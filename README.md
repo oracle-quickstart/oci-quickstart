@@ -1,5 +1,8 @@
-# oci-quickstart-bestpractices
+# oci-quickstart
 
-These are some documents that cover best practices for the [Oracle Cloud Infrastructure Quick Start](https://github.com/oracle?q=quickstart).  Feel free to open issues and pull requests.  We love feedback.
+The [Oracle Cloud Infrastructure (OCI) Quick Start](https://github.com/oracle?q=quickstart) is a collection of examples that allow OCI users to get a quick start deploying advanced infrastructure on OCI.
 
-If you have something you think might be a good fit for the Quick Start, please reach out to ben.lackey@oracle.com.
+## Have an example you want to contribute?
+If you are either an Oracle employee or a partner and have something you think might be a good fit for the Quick Start, please reach out to ben.lackey@oracle.com.  Resources for partners interested in building Quick Starts include:
+* [Best Practices](partners/Best%20Practices.md)
+* [Marketplace and Quick Start](partners/Marketplace%20and%20Quick%20Start.md)
