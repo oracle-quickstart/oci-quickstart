@@ -3,7 +3,8 @@ This is a guide for ISVs to promote their OCI Quick Start to an OCI Marketplace 
 
 ## Business Development Steps
 1. [Join Oracle Partner Network (OPN)](https://www.oracle.com/partners/en/partner-with-oracle/get-started/join-opn/index.html) at a Silver level for $500.  We're working on a free tier but that is not currently available.
-2. Fill out the Marketplace form.  You'll need your OPN number.
+2. Sign up to "Become a Publisher" in the upper right of the [Partner Portal](https://cloudmarketplace.oracle.com/marketplace/en_US/partnerLandingPage).  You will need your OPN number.  Part of the signup here is agreeing to the Marketplace Adendum.
+3. The last contract step is to agree the Sellers Agreement.  You can work with Ben to get a copy of that.
 
 ## Technical - Get an OCI Tenancy
 You'll need to sign up for an OCI account to build and test the work.  We're working on a system to provide credits to ISVs we're partnering with to offset the cost here.  Unfortunately, that program is not yet available.
