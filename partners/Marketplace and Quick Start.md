@@ -13,4 +13,4 @@ You'll need to sign up for an OCI account to build and test the work.  We're wor
 2. Convert the trial to a paid account
 3. Request increases to service limits.  For instance, you might want to request access to GPU instances
 
-With all that done, it's probably time for technical onboarding.  We suggest arranging a joint call to walk through that process and work together on publishing.
+With all that done, it's probably time for technical onboarding.  We suggest arranging a joint call to walk through that process and work together on publishing.  If you already have a Quick Start, the process will be very lightweight.
