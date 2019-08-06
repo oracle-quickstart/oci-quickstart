@@ -10,7 +10,7 @@ Quick Start deployments are intended to give OCI users a quick start running som
 Yes, there may be a tgz or zip.  Don't use it!  Use the package.  Somebody who knows about the application at hand built a package.  It includes lots of logic you don't want to rewrite.  Follow the three virtues and be lazy!
 
 ## We don't use bastions.
-Bastion hosts are a broken security model that some incredibly risk averse developed by people who never had to use any software in production, much less develop anything.  The result is they are an unusable model requiring terminal sessions and more to hop between multiple machines.  As a general rule we don't put them in a Quick Start.  There would have to be a very good reason to break this rule.
+Bastion hosts are part a broken security model developed by people who never had to use any software in production, much less develop anything.  The result is they are an unusable model requiring terminal sessions and more to hop between multiple machines.  As a general rule we don't put them in a Quick Start.  There would have to be a very good reason to break this rule.
 
 ## We use cloud-init.  We do use not remote-exec or local-exec.
 Yes, those are nifty features of Terraform.  That doesn't mean you have to use them.  Before Terraform there was cloud-init.  It's more scalable than SSH'ing into each node.  It's more robust to connectivity issues (like closing your laptop before deploy is done) and it runs asynchronously.  Beyond that, it's the model every other cloud uses.  We use it wherever we can.  If there's some reason we can, then fine, drop down to SSH'ing to a node.
