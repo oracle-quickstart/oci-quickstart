@@ -26,9 +26,8 @@ auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 
 	'Authorization': f"Basic {encoded_string}"}
 
 r = requests.post(token_url, headers=auth_headers)
-r_dic = json.loads(r.text)
 
-access_token = r_dic['access_token']
+access_token = json.loads(r.text).get('access_token')
 
 api_url = "https://ocm-apis-cloud.oracle.com/"
 api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
@@ -37,6 +36,6 @@ api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer
 get_listings_apicall = "appstore/publisher/v1/listings"
 
 r = requests.get(api_url + get_listings_apicall, headers=api_headers)
-r_dic = json.loads(r.text)
+r_json = json.loads(r.text)
 
-print(json.dumps(r_dic, indent=4, sort_keys=False))
+print(json.dumps(r_json, indent=4, sort_keys=False))
