@@ -1,6 +1,6 @@
 # oci-quickstart
 
-The [Oracle Cloud Infrastructure (OCI) Quick Start](https://github.com/oracle?q=quickstart) is a collection of examples that allow OCI users to get a quick start deploying advanced infrastructure on OCI.
+The [Oracle Cloud Infrastructure (OCI) Quick Start](https://github.com/oci-quickstart) is a collection of examples that allow OCI users to get a quick start deploying advanced infrastructure on OCI.
 
 ## Have an example you want to contribute?
 If you are either an Oracle employee or a partner and have something you think might be a good fit for the Quick Start, please reach out to ben.lackey@oracle.com.  Resources for partners interested in building Quick Starts include:
