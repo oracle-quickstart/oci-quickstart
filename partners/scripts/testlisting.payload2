@@ -1,0 +1,123 @@
+{
+    "name": "REST API Test App01",
+    "shortDescription": "White",
+    "longDescription": "Example",
+    "usageInformation": "Usage information for the App01",
+    "tags": "Fusion CRM",
+    "tagLine": "Sales Training Software | Sales Enablement",
+    "versionDetails": {
+        "versionNumber": "1.0v",
+        "description": "Initial Release",
+        "releaseDate": "2013-06-30T07:00:00.000Z"
+    },
+ "languages": [
+        {
+            "code": "en_US"
+        },
+        {
+            "code": "fr_FR"
+        }
+    ],
+    "products": [
+        {
+            "code": "SALES",
+            "categories": [
+                {
+                    "code": "LEAD"
+                },
+                {
+                    "code": "OPPORTUNITY"
+                }
+            ],
+            "filters": [
+                {
+                    "code": "FILTERNAME",
+                    "values": [
+                        {
+                            "code": "FILTERVALUECODE1"
+                        },
+                        {
+                            "code": "FILTERVALUECODE2"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "code": "MARKETING",
+            "categories": [
+                {
+                    "code": "CHANNEL"
+                }
+            ],
+            "filters": [
+                {
+                    "code": "FILTERNAME",
+                    "values": [
+                        {
+                            "code": "FILTERVALUECODE1"
+                        },
+                        {
+                            "code": "FILTERVALUECODE2"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deviceType": {
+        "code": "BROWSER"
+    },
+    "demoURL": "https://www.youtube.com/watch?v=Re4UA6_sD1E",
+    "additionalInfo": {
+        "vanityURL": "https://cloudmarketplace-stage.oracle.com/marketplace/app/vanityurlsample1testjan112",
+        "vanityURLSuffix": "vanityurlsample1testjan112"
+    },
+    "pricing": {
+        "type": "PAID",
+        "description": "Subscription charges"
+    },
+    "downloadInfo": {
+      "type": "TEXT",
+      "value": "getapp"
+     },
+    "systemRequirements": "Test Notes Version 7, 8 and 9 are supported",
+    "support": {
+        "contacts": [
+            {
+                "name": "Technical Support",
+                "phone": "1-908-679-0000",
+                "email": "fname.lname@oracle.com",
+                "subject": "Test subject"
+            }
+        ],
+        "links": [
+            {
+                "name": "Test Listing Link",
+                "url": "https://www.oracle.com"
+            }
+        ]
+    },
+   "availableInAllRegions" : false,
+   "regions" : [
+        {
+            "code":"APAC",
+            "countries":[
+                {
+                    "code": "Afghanistan"       
+                },
+                {
+                    "code": "India"     
+                }
+            ]
+        },
+        {
+            "code":"ME",
+            "countries":[
+                {
+                    "code": "All"       
+                }
+            ]
+        }
+    ]
+}
