@@ -16,6 +16,18 @@ parser.add_argument('-id', type=int,
 
 args = parser.parse_args()
 
+
+action_api_uri = { "get_listings" : "appstore/publisher/v1/listings",
+  "get_packages" : "appstore/publisher/v1/artifacts",
+  "get_package" : f"appstore/publisher/v1/artifacts/{args.id}",
+  "get_applications" : "appstore/publisher/v1/applications",
+  "get_application" : f"appstore/publisher/v1/applications/{args.id}",
+  "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
+  "get_listing_package" : f"appstore/publisher/v1/applications/{args.id}/packages",
+  "get_application_package" : f"appstore/publisher/v1/applications/{args.id}/packages",
+  "create_listing" : f"appstore/publisher/v1/applications",
+}
+
 with open(args.creds + "_creds.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
 
@@ -29,86 +41,12 @@ encoded_string = encoded.decode("ascii")
 token_url = "https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials"
 
 auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8', 'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650',
-	'Authorization': f"Basic {encoded_string}"}
+        'Authorization': f"Basic {encoded_string}"}
 
 r = requests.post(token_url, headers=auth_headers)
 
 access_token = json.loads(r.text).get('access_token')
 
-
-def get_listings():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = "appstore/publisher/v1/listings"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
-
-
-def get_packages():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = "appstore/publisher/v1/artifacts"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
-
-def get_package():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = f"appstore/publisher/v1/artifacts/{args.id}"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
-
-
-def get_applications():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = "appstore/publisher/v1/applications"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
-
-def get_application():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = f"appstore/publisher/v1/applications/{args.id}"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
-
-def get_application_package():
-
-  api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-  apicall = f"appstore/publisher/v1/applications/{args.id}/packages"
-
-  r = requests.get(api_url + apicall, headers=api_headers)
-  r_json = json.loads(r.text)
-
-  print(json.dumps(r_json, indent=4, sort_keys=False))
 
 def create_listing():
 
@@ -126,22 +64,28 @@ def create_listing():
   r = requests.post(api_url + apicall, headers=api_headers, json=body_json)
 
   print (r.text)
-  
+
   r_json = json.loads(r.text)
   print(json.dumps(r_json, indent=4, sort_keys=False))
 
 
-action = { "get_listings" : get_listings,
-  "get_packages" : get_packages,
-  "get_package" : get_package,
-  "get_applications" : get_applications,
-  "get_application" : get_application,
-  "get_listing" : get_application,
-  "get_listing_package" : get_application_package,
-  "get_application_pacakage" : get_application_package,
-  "create_listing" : create_listing,
-}
+def do_get_action():
+  api_url = "https://ocm-apis-cloud.oracle.com/"
+  api_headers = {'X-Oracle-UserId': creds['user_email'],      'Authorization': f"Bearer {access_token}"}
+  apicall = action_api_uri[args.action]
+  r = requests.get(api_url + apicall, headers=api_headers)
+  r_json = json.loads(r.text)
+  
+  print(api_url + apicall)
+  print(json.dumps(r_json, indent=4, sort_keys=False))
+  
 
-action[args.action]()
+if "get" in args.action:
+  do_get_action()
+  
+if "create" in args.action:
+  do_create_action()
+
+
 
 
