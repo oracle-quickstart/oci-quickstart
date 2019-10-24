@@ -75,20 +75,30 @@ def create_listing():
 
 def do_get_action():
   api_url = "https://ocm-apis-cloud.oracle.com/"
-  api_headers = {'X-Oracle-UserId': creds['user_email'],      'Authorization': f"Bearer {access_token}"}
+  api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
   apicall = action_api_uri[args.action]
-  r = requests.get(api_url + apicall, headers=api_headers)
+  uri = api_url + apicall
+  r = requests.get(uri, headers=api_headers)
   r_json = json.loads(r.text)
-  
-  print(api_url + apicall)
-  print(json.dumps(r_json, indent=4, sort_keys=True))
-  
+
+  return uri, r_json
+
+def do_build():
+  pass
+
+def do_create_action():
+  pass
 
 if "get" in args.action:
-  do_get_action()
-  
+  uri, r_json = do_get_action()
+  print(uri)
+  print(json.dumps(r_json, indent=4, sort_keys=True))
+
 if "create" in args.action:
   do_create_action()
+
+if "build" in args.action:
+  do_build()
 
 
 
