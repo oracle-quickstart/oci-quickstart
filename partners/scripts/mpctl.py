@@ -12,19 +12,23 @@ parser.add_argument('-action',
                     help='the action to perform')
 parser.add_argument('-id', type=int,
                     help='the id to act on')
+parser.add_argument('-id2', type=int,
+                    help='the second id to act on')
 
 
 args = parser.parse_args()
 
 
-action_api_uri = { "get_listings" : "appstore/publisher/v1/listings",
-  "get_packages" : "appstore/publisher/v1/artifacts",
-  "get_package" : f"appstore/publisher/v1/artifacts/{args.id}",
+action_api_uri = { 
+  "get_listings" : "appstore/publisher/v1/listings",
+  "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
+  "get_artifacts" : "appstore/publisher/v1/artifacts",
+  "get_artifact" : f"appstore/publisher/v1/artifacts/{args.id}",
   "get_applications" : "appstore/publisher/v1/applications",
   "get_application" : f"appstore/publisher/v1/applications/{args.id}",
-  "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
-  "get_listing_package" : f"appstore/publisher/v1/applications/{args.id}/packages",
-  "get_application_package" : f"appstore/publisher/v1/applications/{args.id}/packages",
+  "get_listing_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
+  "get_application_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
+  "get_application_package" : f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}",
   "create_listing" : f"appstore/publisher/v1/applications",
 }
 
@@ -77,7 +81,7 @@ def do_get_action():
   r_json = json.loads(r.text)
   
   print(api_url + apicall)
-  print(json.dumps(r_json, indent=4, sort_keys=False))
+  print(json.dumps(r_json, indent=4, sort_keys=True))
   
 
 if "get" in args.action:
