@@ -51,6 +51,33 @@ r = requests.post(token_url, headers=auth_headers)
 
 access_token = json.loads(r.text).get('access_token')
 
+class Package:
+
+  artifacts = []
+
+  def __init__(self, packageVersionId):
+    pass
+
+class Listing:
+
+  packageVersions = []
+  listing_json = ''
+
+
+  def __init__(self, listing):
+    self.listing_json = listing
+    pass
+
+
+class Partner:
+
+  listings = []
+
+  def __init__(self, listings_json):
+    for item in listings_json["items"]:
+      self.listings.append(Listing(item["GenericListing"]))
+    pass
+
 
 def create_listing():
 
@@ -84,6 +111,9 @@ def do_get_action():
   return uri, r_json
 
 def do_build():
+  args.action = "get_listings"
+  uri, r = do_get_action()
+  partner = Partner(r)
   pass
 
 def do_create_action():
