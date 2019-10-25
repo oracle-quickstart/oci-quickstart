@@ -5,6 +5,8 @@ import requests
 import json
 import argparse
 
+action_api_uri_dic = []
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-creds',
                     help='the name of the creds file to use')
@@ -18,19 +20,20 @@ parser.add_argument('-id2', type=int,
 
 args = parser.parse_args()
 
-
-action_api_uri = { 
-  "get_listings" : "appstore/publisher/v1/listings",
-  "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
-  "get_artifacts" : "appstore/publisher/v1/artifacts",
-  "get_artifact" : f"appstore/publisher/v1/artifacts/{args.id}",
-  "get_applications" : "appstore/publisher/v1/applications",
-  "get_application" : f"appstore/publisher/v1/applications/{args.id}",
-  "get_listing_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
-  "get_application_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
-  "get_application_package" : f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}",
-  "create_listing" : f"appstore/publisher/v1/applications",
-}
+def bind_action_dic():
+  global action_api_uri_dic
+  action_api_uri_dic = {
+    "get_listings" : "appstore/publisher/v1/listings",
+    "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
+    "get_artifacts" : "appstore/publisher/v1/artifacts",
+    "get_artifact" : f"appstore/publisher/v1/artifacts/{args.id}",
+    "get_applications" : "appstore/publisher/v1/applications",
+    "get_application" : f"appstore/publisher/v1/applications/{args.id}",
+    "get_listing_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
+    "get_application_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
+    "get_application_package" : f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}",
+    "create_listing" : f"appstore/publisher/v1/applications",
+  }
 
 with open(args.creds + "_creds.yaml", 'r') as stream:
     creds = yaml.safe_load(stream)
@@ -51,32 +54,79 @@ r = requests.post(token_url, headers=auth_headers)
 
 access_token = json.loads(r.text).get('access_token')
 
+class ArtifactVerion:
+  details = []
+
+  def __init__(self, details):
+    self.details = details
+
+
+class Artifact:
+  versions = []
+  resource = []
+
+  def __init__(self, resource):
+    self.resource = resource
+    self.versions = []
+    for property in resource["properties"]:
+      args.action = "get_artifact"
+      args.id = int(property["value"])
+      bind_action_dic()
+      uri, r = do_get_action()
+      av = ArtifactVerion(r)
+      self.versions.append(av)
+
+
 class Package:
 
+  package = []
   artifacts = []
 
-  def __init__(self, packageVersionId):
-    pass
+  def __init__(self, package, listingVersionId):
+    self.artifacts = []
+    self.package = package["Package"]
+    for resource in self.package["resources"]:
+      a = Artifact(resource)
+      self.artifacts.append(a)
+
 
 class Listing:
 
   packageVersions = []
-  listing_json = ''
-
+  listing = ''
+  lisitingDetails = ''
+  packages = []
 
   def __init__(self, listing):
-    self.listing_json = listing
-    pass
+    self.packages = []
+    self.listing = listing
+    self.packageVersions = self.listing["packageVersions"]
+
+    args.action = "get_listing"
+    args.id = self.listing["listingVersionId"]
+    bind_action_dic()
+    uri, self.lisitingDetails = do_get_action()
+
+    args.action = "get_application_packages"
+    bind_action_dic()
+    packages = []
+    uri, packages = do_get_action()
+
+    for package in packages["items"]:
+      p = Package(package, args.id)
+      self.packages.append(p)
+
 
 
 class Partner:
 
   listings = []
 
-  def __init__(self, listings_json):
-    for item in listings_json["items"]:
-      self.listings.append(Listing(item["GenericListing"]))
-    pass
+  def __init__(self, listings):
+    for item in listings["items"]:
+      l = Listing(item["GenericListing"])
+      self.listings.append(l)
+
 
 
 def create_listing():
@@ -101,9 +151,10 @@ def create_listing():
 
 
 def do_get_action():
+  bind_action_dic()
   api_url = "https://ocm-apis-cloud.oracle.com/"
   api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-  apicall = action_api_uri[args.action]
+  apicall = action_api_uri_dic[args.action]
   uri = api_url + apicall
   r = requests.get(uri, headers=api_headers)
   r_json = json.loads(r.text)
@@ -111,12 +162,14 @@ def do_get_action():
   return uri, r_json
 
 def do_build():
+  bind_action_dic()
   args.action = "get_listings"
   uri, r = do_get_action()
   partner = Partner(r)
-  pass
+  print (partner)
 
 def do_create_action():
+  bind_action_dic()
   pass
 
 if "get" in args.action:
