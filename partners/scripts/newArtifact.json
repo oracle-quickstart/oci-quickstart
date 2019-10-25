@@ -1,0 +1,29 @@
+{
+"resources":[
+    {
+       "serviceType":"OCIOrchestration",
+       "type":"terraform",
+       "properties":[
+          {
+             "name":"artifact",
+             "value":"%%ARTID%%",
+             "valueProperties":[
+                {
+                  "name":"name",
+                  "value":"TFArtifact_%%VERS%%"
+                }
+             ]
+          },
+           {
+                  "name": "compartmentId",
+                  "source": "end_user",
+                  "displayName": "Compartment ID",
+                  "dataType": "string",
+                  "mandatory": true,
+                  "custom": false,
+                  "cardinality": "SINGLE_VALUE"
+              }
+          ]
+    }
+ ]
+}

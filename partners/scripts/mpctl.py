@@ -16,6 +16,10 @@ parser.add_argument('-id', type=int,
                     help='the id to act on')
 parser.add_argument('-id2', type=int,
                     help='the second id to act on')
+parser.add_argument('-filename',
+                    help='the name of the TF file')
+parser.add_argument('-version_string',
+                    help='the new version for update')
 
 
 args = parser.parse_args()
@@ -33,6 +37,8 @@ def bind_action_dic():
     "get_application_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
     "get_application_package" : f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}",
     "create_listing" : f"appstore/publisher/v1/applications",
+    "update_stack" : f"appstore/publisher/v1/applications/{args.id}/version",
+    "new_package_version": f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}/version",
   }
 
 with open(args.creds + "_creds.yaml", 'r') as stream:
@@ -100,7 +106,8 @@ class Listing:
   def __init__(self, listing):
     self.packages = []
     self.listing = listing
-    self.packageVersions = self.listing["packageVersions"]
+    if "packageVersions" in self.listing:
+        self.packageVersions = self.listing["packageVersions"]
 
     args.action = "get_listing"
     args.id = self.listing["listingVersionId"]
@@ -123,9 +130,13 @@ class Partner:
   listings = []
 
   def __init__(self, listings):
-    for item in listings["items"]:
-      l = Listing(item["GenericListing"])
-      self.listings.append(l)
+    if "items" in listings:
+        for item in listings["items"]:
+          l = Listing(item["GenericListing"])
+          self.listings.append(l)
+    else:
+        l = Listing(listings)
+        self.listings.append(l)
 
 
 
@@ -163,14 +174,85 @@ def do_get_action():
 
 def do_build():
   bind_action_dic()
-  args.action = "get_listings"
+  if args.id is None:
+    args.action = "get_listings"
+  else:
+    args.action = "get_listing"
   uri, r = do_get_action()
   partner = Partner(r)
-  print (partner)
+  print ("done")
 
-def do_create_action():
+def do_create():
   bind_action_dic()
   pass
+
+def do_update_stack():
+    bind_action_dic()
+    api_url = "https://ocm-apis-cloud.oracle.com/"
+    api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+    apicall = action_api_uri_dic[args.action]
+    uri = api_url + apicall
+    r = requests.post(uri, headers=api_headers)
+    r_json = json.loads(r.txt)
+    newVersionId = r_json["entityId"]
+
+    args.action = "get_application_packages"
+    args.id = newVersionId
+    bind_action_dic()
+    uri, r = do_get_action()
+    newPackageId = r["items"][0]["Package"]["id"]
+
+    args.action = "new_package_version"
+    args.id = newVersionId
+    args.id2 = newPackageId
+    bind_action_dic()
+    apicall = action_api_uri_dic[args.action]
+    uri = api_url + apicall
+    api_headers = {'Content-Type': 'application/json', 'charset': 'UTF-8',
+                   'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+    r = requests.patch(uri, headers=api_headers)
+    r_json = json.loads(r.txt)
+    newPackageVersionId = r_json["entityId"]
+
+    args.action = "get_application_package"
+    args.id2 = newPackageVersionId
+    bind_action_dic()
+    apicall = action_api_uri_dic[args.action]
+    uri = api_url + apicall
+    body = "{'version': '" + args.version_string + "'}"
+    body_json = json.loads(body)
+    r = requests.put(uri, headers=api_headers, json=body_json)
+    r_json = json.loads(r.txt)
+    message = r_json["message"]
+
+    args.action = "get_artifacts"
+    bind_action_dic()
+    apicall = action_api_uri_dic[args.action]
+    uri = api_url + apicall
+    body = "{'name': 'TF_" + args.version_string + "', 'artifactType:': 'TERRAFORM_TEMPLATE'}"
+    body_json = json.loads(body)
+    files = {'upload_file': open('terraform.gz', 'rb')}
+    r = requests.post(uri, headers=api_headers, json=body_json, files=files)
+    r_json = json.loads(r.txt)
+    artifactId = r_json["entityId"]
+
+    with open("newArtifact", "r") as file_in:
+        body = file_in.read()
+
+    body.replace("%%ARTID%%", artifactId)
+    body.replace("%%VERS%%", args.version_string)
+    body_json = json.loads(body)
+    args.action = "get_application_package"
+    args.id2 = newPackageVersionId
+    bind_action_dic()
+    apicall = action_api_uri_dic[args.action]
+    uri = api_url + apicall
+    r = requests.put(uri, headers=api_headers, json=body_json)
+    r_json = json.loads(r.txt)
+    message = r_json["message"]
+
+
+
 
 if "get" in args.action:
   uri, r_json = do_get_action()
@@ -178,10 +260,13 @@ if "get" in args.action:
   print(json.dumps(r_json, indent=4, sort_keys=True))
 
 if "create" in args.action:
-  do_create_action()
+  do_create()
 
 if "build" in args.action:
   do_build()
+
+if "update_stack" in args.action:
+  do_update_stack()
 
 
 
