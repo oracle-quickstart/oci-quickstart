@@ -193,7 +193,7 @@ def do_update_stack():
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
     r = requests.post(uri, headers=api_headers)
-    r_json = json.loads(r.txt)
+    r_json = json.loads(r.text)
     newVersionId = r_json["entityId"]
 
     args.action = "get_application_packages"
@@ -211,7 +211,7 @@ def do_update_stack():
     api_headers = {'Content-Type': 'application/json', 'charset': 'UTF-8',
                    'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
     r = requests.patch(uri, headers=api_headers)
-    r_json = json.loads(r.txt)
+    r_json = json.loads(r.text)
     newPackageVersionId = r_json["entityId"]
 
     args.action = "get_application_package"
@@ -219,21 +219,24 @@ def do_update_stack():
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
-    body = "{'version': '" + args.version_string + "'}"
+    api_headers = {'Content-Type': 'multipart/form-data', 'boundary': '----WebKitFormBoundary7MA4YWxkTrZu0gW', 'charset': 'UTF-8',
+                   'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+    body = '{"version": "' + args.version_string + '", "description": "Description of package", "tncId": "", "serviceType": "OCIOrchestration"}'
     body_json = json.loads(body)
-    r = requests.put(uri, headers=api_headers, json=body_json)
-    r_json = json.loads(r.txt)
+    #r = requests.put(uri, headers=api_headers, json=body_json)
+    r = requests.put(uri, headers=api_headers, data=body)
+    r_json = json.loads(r.text)
     message = r_json["message"]
 
     args.action = "get_artifacts"
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
-    body = "{'name': 'TF_" + args.version_string + "', 'artifactType:': 'TERRAFORM_TEMPLATE'}"
+    body = '{"name": "TF_' + args.version_string + '", "artifactType:": "TERRAFORM_TEMPLATE"}'
     body_json = json.loads(body)
-    files = {'upload_file': open('terraform.gz', 'rb')}
+    files = {'upload_file': open('tf.zip', 'rb')}
     r = requests.post(uri, headers=api_headers, json=body_json, files=files)
-    r_json = json.loads(r.txt)
+    r_json = json.loads(r.text)
     artifactId = r_json["entityId"]
 
     with open("newArtifact", "r") as file_in:
@@ -248,7 +251,7 @@ def do_update_stack():
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
     r = requests.put(uri, headers=api_headers, json=body_json)
-    r_json = json.loads(r.txt)
+    r_json = json.loads(r.text)
     message = r_json["message"]
 
 
