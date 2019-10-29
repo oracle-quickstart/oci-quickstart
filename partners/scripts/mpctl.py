@@ -23,8 +23,9 @@ parser.add_argument('-filename',
 parser.add_argument('-version_string',
                     help='the new version for update')
 
-
 args = parser.parse_args()
+access_token = ''
+creds = []
 
 def bind_action_dic():
   global action_api_uri_dic
@@ -42,25 +43,6 @@ def bind_action_dic():
     "update_stack" : f"appstore/publisher/v1/applications/{args.listingVersionId}/version",
     "new_package_version": f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}/version",
   }
-
-with open(args.creds + "_creds.yaml", 'r') as stream:
-    creds = yaml.safe_load(stream)
-
-auth_string = creds['client_id']
-auth_string += ':'
-auth_string += creds['secret_key']
-
-encoded = base64.b64encode(auth_string.encode('ascii'))
-encoded_string = encoded.decode("ascii")
-
-token_url = "https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials"
-
-auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8', 'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650',
-        'Authorization': f"Basic {encoded_string}"}
-
-r = requests.post(token_url, headers=auth_headers)
-
-access_token = json.loads(r.text).get('access_token')
 
 class ArtifactVerion:
   details = []
@@ -122,8 +104,6 @@ class Listing:
       p = Package(package)
       self.packages.append(p)
 
-
-
 class Partner:
 
   listings = []
@@ -137,6 +117,28 @@ class Partner:
         l = Listing(listings)
         self.listings.append(l)
 
+def get_access_token():
+    global access_token
+    global creds
+    with open(args.creds + "_creds.yaml", 'r') as stream:
+        creds = yaml.safe_load(stream)
+
+    auth_string = creds['client_id']
+    auth_string += ':'
+    auth_string += creds['secret_key']
+
+    encoded = base64.b64encode(auth_string.encode('ascii'))
+    encoded_string = encoded.decode("ascii")
+
+    token_url = "https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials"
+
+    auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8',
+                    'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650',
+                    'Authorization': f"Basic {encoded_string}"}
+
+    r = requests.post(token_url, headers=auth_headers)
+
+    access_token = json.loads(r.text).get('access_token')
 
 
 def create_listing():
@@ -158,7 +160,6 @@ def create_listing():
 
   r_json = json.loads(r.text)
   print(json.dumps(r_json, indent=4, sort_keys=False))
-
 
 def do_get_action():
   bind_action_dic()
@@ -254,7 +255,7 @@ def do_update_stack():
     message = r_json["message"]
 
 
-
+get_access_token()
 
 if "get" in args.action:
   uri, r_json = do_get_action()
