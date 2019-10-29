@@ -44,7 +44,7 @@ def bind_action_dic():
     "new_package_version": f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}/version",
   }
 
-class ArtifactVerion:
+class ArtifactVersion:
   details = []
 
   def __init__(self, details):
@@ -62,7 +62,7 @@ class Artifact:
       args.artifactId = int(property["value"])
       bind_action_dic()
       uri, r = do_get_action()
-      av = ArtifactVerion(r)
+      av = ArtifactVersion(r)
       self.versions.append(av)
 
 class Package:
@@ -187,6 +187,8 @@ def do_create():
   pass
 
 def do_update_stack():
+
+    #create a new version for the application listing
     bind_action_dic()
     api_url = "https://ocm-apis-cloud.oracle.com/"
     api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
@@ -196,12 +198,14 @@ def do_update_stack():
     r_json = json.loads(r.text)
     newVersionId = r_json["entityId"]
 
+    #get the package version id needed for package version creation
     args.action = "get_application_packages"
     args.listingVersionId = newVersionId
     bind_action_dic()
     uri, r = do_get_action()
     newPackageId = r["items"][0]["Package"]["id"]
 
+    #create a package version from existing package
     args.action = "new_package_version"
     args.listingVersionId = newVersionId
     args.packageVersionId = newPackageId
@@ -214,6 +218,7 @@ def do_update_stack():
     r_json = json.loads(r.text)
     newPackageVersionId = r_json["entityId"]
 
+    #update versioned package details
     args.action = "get_application_package"
     args.packageVersionId = newPackageVersionId
     bind_action_dic()
@@ -228,6 +233,7 @@ def do_update_stack():
     r_json = json.loads(r.text)
     message = r_json["message"]
 
+    # create new artifact
     args.action = "get_artifacts"
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
@@ -239,9 +245,9 @@ def do_update_stack():
     r_json = json.loads(r.text)
     artifactId = r_json["entityId"]
 
+    #update versioned package details - associate newly created artifact
     with open("newArtifact", "r") as file_in:
         body = file_in.read()
-
     body.replace("%%ARTID%%", artifactId)
     body.replace("%%VERS%%", args.version_string)
     body_json = json.loads(body)
@@ -253,7 +259,7 @@ def do_update_stack():
     r = requests.put(uri, headers=api_headers, json=body_json)
     r_json = json.loads(r.text)
     message = r_json["message"]
-
+    return message
 
 get_access_token()
 
@@ -269,7 +275,7 @@ if "build" in args.action:
   do_build()
 
 if "update_stack" in args.action:
-  do_update_stack()
+  print(do_update_stack())
 
 
 
