@@ -12,10 +12,12 @@ parser.add_argument('-creds',
                     help='the name of the creds file to use')
 parser.add_argument('-action',
                     help='the action to perform')
-parser.add_argument('-id', type=int,
-                    help='the id to act on')
-parser.add_argument('-id2', type=int,
-                    help='the second id to act on')
+parser.add_argument('-listingVersionId', type=int,
+                    help='the listing version to act on')
+parser.add_argument('-packageVersionId', type=int,
+                    help='the package version to act on')
+parser.add_argument('-artifactId', type=int,
+                    help='the artifact to act on')
 parser.add_argument('-filename',
                     help='the name of the TF file')
 parser.add_argument('-version_string',
@@ -28,17 +30,17 @@ def bind_action_dic():
   global action_api_uri_dic
   action_api_uri_dic = {
     "get_listings" : "appstore/publisher/v1/listings",
-    "get_listing" : f"appstore/publisher/v1/applications/{args.id}",
+    "get_listing" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
     "get_artifacts" : "appstore/publisher/v1/artifacts",
-    "get_artifact" : f"appstore/publisher/v1/artifacts/{args.id}",
+    "get_artifact" : f"appstore/publisher/v1/artifacts/{args.artifactId}",
     "get_applications" : "appstore/publisher/v1/applications",
-    "get_application" : f"appstore/publisher/v1/applications/{args.id}",
-    "get_listing_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
-    "get_application_packages" : f"appstore/publisher/v2/applications/{args.id}/packages",
-    "get_application_package" : f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}",
+    "get_application" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
+    "get_listing_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
+    "get_application_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
+    "get_application_package" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}",
     "create_listing" : f"appstore/publisher/v1/applications",
-    "update_stack" : f"appstore/publisher/v1/applications/{args.id}/version",
-    "new_package_version": f"appstore/publisher/v2/applications/{args.id}/packages/{args.id2}/version",
+    "update_stack" : f"appstore/publisher/v1/applications/{args.listingVersionId}/version",
+    "new_package_version": f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}/version",
   }
 
 with open(args.creds + "_creds.yaml", 'r') as stream:
@@ -66,7 +68,6 @@ class ArtifactVerion:
   def __init__(self, details):
     self.details = details
 
-
 class Artifact:
   versions = []
   resource = []
@@ -76,25 +77,23 @@ class Artifact:
     self.versions = []
     for property in resource["properties"]:
       args.action = "get_artifact"
-      args.id = int(property["value"])
+      args.artifactId = int(property["value"])
       bind_action_dic()
       uri, r = do_get_action()
       av = ArtifactVerion(r)
       self.versions.append(av)
-
 
 class Package:
 
   package = []
   artifacts = []
 
-  def __init__(self, package, listingVersionId):
+  def __init__(self, package):
     self.artifacts = []
     self.package = package["Package"]
     for resource in self.package["resources"]:
       a = Artifact(resource)
       self.artifacts.append(a)
-
 
 class Listing:
 
@@ -110,7 +109,7 @@ class Listing:
         self.packageVersions = self.listing["packageVersions"]
 
     args.action = "get_listing"
-    args.id = self.listing["listingVersionId"]
+    args.listingVersionId = self.listing["listingVersionId"]
     bind_action_dic()
     uri, self.lisitingDetails = do_get_action()
 
@@ -120,7 +119,7 @@ class Listing:
     uri, packages = do_get_action()
 
     for package in packages["items"]:
-      p = Package(package, args.id)
+      p = Package(package)
       self.packages.append(p)
 
 
@@ -174,7 +173,7 @@ def do_get_action():
 
 def do_build():
   bind_action_dic()
-  if args.id is None:
+  if args.listingVersionId is None:
     args.action = "get_listings"
   else:
     args.action = "get_listing"
@@ -197,14 +196,14 @@ def do_update_stack():
     newVersionId = r_json["entityId"]
 
     args.action = "get_application_packages"
-    args.id = newVersionId
+    args.listingVersionId = newVersionId
     bind_action_dic()
     uri, r = do_get_action()
     newPackageId = r["items"][0]["Package"]["id"]
 
     args.action = "new_package_version"
-    args.id = newVersionId
-    args.id2 = newPackageId
+    args.listingVersionId = newVersionId
+    args.packageVersionId = newPackageId
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
@@ -215,7 +214,7 @@ def do_update_stack():
     newPackageVersionId = r_json["entityId"]
 
     args.action = "get_application_package"
-    args.id2 = newPackageVersionId
+    args.packageVersionId = newPackageVersionId
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
@@ -223,8 +222,8 @@ def do_update_stack():
                    'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
     body = '{"version": "' + args.version_string + '", "description": "Description of package", "tncId": "", "serviceType": "OCIOrchestration"}'
     body_json = json.loads(body)
-    #r = requests.put(uri, headers=api_headers, json=body_json)
-    r = requests.put(uri, headers=api_headers, data=body)
+    r = requests.put(uri, headers=api_headers, json=body_json)
+    #r = requests.put(uri, headers=api_headers, data=body)
     r_json = json.loads(r.text)
     message = r_json["message"]
 
@@ -246,7 +245,7 @@ def do_update_stack():
     body.replace("%%VERS%%", args.version_string)
     body_json = json.loads(body)
     args.action = "get_application_package"
-    args.id2 = newPackageVersionId
+    args.packageVersionId = newPackageVersionId
     bind_action_dic()
     apicall = action_api_uri_dic[args.action]
     uri = api_url + apicall
