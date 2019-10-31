@@ -5,6 +5,22 @@ import requests
 import json
 import argparse
 
+####################################
+#
+# usage:
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+####################################
+
 action_api_uri_dic = []
 
 parser = argparse.ArgumentParser()
@@ -16,6 +32,10 @@ parser.add_argument('-listingVersionId', type=int,
                     help='the listing version to act on')
 parser.add_argument('-packageVersionId', type=int,
                     help='the package version to act on')
+parser.add_argument('-termsId', type=int,
+                    help='the terms to act on')
+parser.add_argument('-termsVersionId', type=int,
+                    help='the terms version to act on')
 parser.add_argument('-artifactId', type=int,
                     help='the artifact to act on')
 parser.add_argument('-filename',
@@ -28,27 +48,34 @@ access_token = ''
 creds = []
 
 def bind_action_dic():
-  global action_api_uri_dic
-  action_api_uri_dic = {
-    "get_listings" : "appstore/publisher/v1/listings",
-    "get_listing" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
-    "get_artifacts" : "appstore/publisher/v1/artifacts",
-    "get_artifact" : f"appstore/publisher/v1/artifacts/{args.artifactId}",
-    "get_applications" : "appstore/publisher/v1/applications",
-    "get_application" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
-    "get_listing_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
-    "get_application_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
-    "get_application_package" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}",
-    "create_listing" : f"appstore/publisher/v1/applications",
-    "update_stack" : f"appstore/publisher/v1/applications/{args.listingVersionId}/version",
-    "new_package_version": f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}/version",
-  }
+    global action_api_uri_dic
+    action_api_uri_dic = {
+        "get_listings" : "appstore/publisher/v1/listings",
+        "get_listing" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
+        "get_artifacts" : "appstore/publisher/v1/artifacts",
+        "get_artifact" : f"appstore/publisher/v1/artifacts/{args.artifactId}",
+        "get_applications" : "appstore/publisher/v1/applications",
+        "get_application" : f"appstore/publisher/v1/applications/{args.listingVersionId}",
+        "get_listing_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
+        "get_application_packages" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages",
+        "get_application_package" : f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}",
+        "get_terms": "appstore/publisher/v1/terms",
+        "get_terms_version": f"appstore/publisher/v1/terms/{args.termsId}/version/{args.termsVersionId}",
+        "create_listing" : f"appstore/publisher/v1/applications",
+        "update_stack" : f"appstore/publisher/v1/applications/{args.listingVersionId}/version",
+        "new_package_version": f"appstore/publisher/v2/applications/{args.listingVersionId}/packages/{args.packageVersionId}/version",
+    }
 
 class ArtifactVersion:
   details = []
 
   def __init__(self, details):
     self.details = details
+
+  def __str__(self):
+      ppstring = ''
+      ppstring += json.dumps(self.details, indent=4, sort_keys=False)
+      return ppstring
 
 class Artifact:
   versions = []
@@ -65,6 +92,13 @@ class Artifact:
       av = ArtifactVersion(r)
       self.versions.append(av)
 
+  def __str__(self):
+      ppstring = ''
+      ppstring += json.dumps(self.resource, indent=4, sort_keys=False)
+      for version in self.versions:
+          ppstring += str(version)
+      return ppstring
+
 class Package:
 
   package = []
@@ -77,11 +111,19 @@ class Package:
       a = Artifact(resource)
       self.artifacts.append(a)
 
+  def __str__(self):
+      ppstring = ''
+      ppstring += json.dumps(self.package, indent=4, sort_keys=False)
+      for artifact in self.artifacts:
+          ppstring += str(artifact)
+      return ppstring
+
+
 class Listing:
 
   packageVersions = []
   listing = ''
-  lisitingDetails = ''
+  listingDetails = ''
   packages = []
 
   def __init__(self, listing):
@@ -93,7 +135,7 @@ class Listing:
     args.action = "get_listing"
     args.listingVersionId = self.listing["listingVersionId"]
     bind_action_dic()
-    uri, self.lisitingDetails = do_get_action()
+    uri, self.listingDetails = do_get_action()
 
     args.action = "get_application_packages"
     bind_action_dic()
@@ -104,18 +146,97 @@ class Listing:
       p = Package(package)
       self.packages.append(p)
 
+  def __str__(self):
+      ppstring = ''
+      ppstring += json.dumps(self.listing, indent=4, sort_keys=False)
+      ppstring += json.dumps(self.listingDetails, indent=4, sort_keys=False)
+      ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
+      for package in self.packages:
+          ppstring += str(package)
+      return ppstring
+
+
+class TermVersion():
+
+    termVersion = []
+
+    def __init__(self, termsId, termVersion):
+        args.action = "get_terms_version"
+        args.termsId = termsId
+        args.termsVersionId = termVersion["termsVersionId"]
+        bind_action_dic()
+        uri, tv = do_get_action()
+        self.termVersion = tv
+
+    def __str__(self):
+        return json.dumps(self.termVersion, indent=4, sort_keys=False)
+
+
+class Terms():
+
+    terms = []
+    termVersions= []
+
+    def __init__(self, terms):
+        self.terms = terms
+        self.termVersions = []
+
+        for termVersion in terms["termVersions"]:
+            tv = TermVersion(terms["termsId"], termVersion)
+            self.termVersions.append(tv)
+
+    def __str__(self):
+        ppstring = ''
+        ppstring += str(self.terms)
+        for termVersion in self.termVersions:
+            ppstring += str(termVersion)
+        return ppstring
+
+
 class Partner:
 
-  listings = []
+    listings = []
+    terms = []
 
-  def __init__(self, listings):
-    if "items" in listings:
-        for item in listings["items"]:
-          l = Listing(item["GenericListing"])
-          self.listings.append(l)
-    else:
-        l = Listing(listings)
-        self.listings.append(l)
+    def __init__(self):
+        bind_action_dic()
+        if args.listingVersionId is None:
+          args.action = "get_listings"
+        else:
+          args.action = "get_listing"
+        uri, listings = do_get_action()
+
+        if "items" in listings:
+          for item in listings["items"]:
+              l = Listing(item["GenericListing"])
+              self.listings.append(l)
+        else:
+            l = Listing(listings)
+            self.listings.append(l)
+
+        args.action = "get_terms"
+        bind_action_dic()
+        uri, terms = do_get_action()
+        if "items" in terms:
+          for item in terms["items"]:
+              t = Terms(item["terms"])
+              self.terms.append(t)
+        else:
+            t = Terms(terms)
+            self.terms.append(t)
+
+
+        pass
+
+
+    def __str__(self):
+      ppstring = ''
+      for listing in self.listings:
+          ppstring += str(listing)
+      for terms in self.terms:
+          ppstring += str(terms)
+      return ppstring
+
 
 def get_access_token():
     global access_token
@@ -173,14 +294,8 @@ def do_get_action():
   return uri, r_json
 
 def do_build():
-  bind_action_dic()
-  if args.listingVersionId is None:
-    args.action = "get_listings"
-  else:
-    args.action = "get_listing"
-  uri, r = do_get_action()
-  partner = Partner(r)
-  print ("done")
+
+  return partner
 
 def do_create():
   bind_action_dic()
@@ -188,7 +303,12 @@ def do_create():
 
 def do_update_stack():
 
+    partner = Partner()
+
+    #tcnId = partner.terms[0].termVersions[0].termVersion["termsVersionId"]
+    tcnId = partner.terms[0].termVersions[0].termVersion["contentId"]
     #create a new version for the application listing
+    args.action = "update_stack"
     bind_action_dic()
     api_url = "https://ocm-apis-cloud.oracle.com/"
     api_headers = {'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
@@ -226,10 +346,9 @@ def do_update_stack():
     uri = api_url + apicall
     api_headers = {'Content-Type': 'multipart/form-data', 'boundary': '----WebKitFormBoundary7MA4YWxkTrZu0gW', 'charset': 'UTF-8',
                    'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-    body = '{"version": "' + args.version_string + '", "description": "Description of package", "tncId": "", "serviceType": "OCIOrchestration"}'
+    body = '{"version": "' + args.version_string + '", "description": "Description of package", "tncId": "'+ str(tcnId) +'", "serviceType": "OCIOrchestration"}'
     body_json = json.loads(body)
     r = requests.put(uri, headers=api_headers, json=body_json)
-    #r = requests.put(uri, headers=api_headers, data=body)
     r_json = json.loads(r.text)
     message = r_json["message"]
 
@@ -272,7 +391,8 @@ if "create" in args.action:
   do_create()
 
 if "build" in args.action:
-  do_build()
+  partner = Partner()
+  print(partner)
 
 if "update_stack" in args.action:
   print(do_update_stack())
