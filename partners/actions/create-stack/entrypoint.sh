@@ -1,6 +1,6 @@
 #!/bin/bash
 apt-get update
-apt install -y build-essential zip
+apt install -y build-essential zip python3 pyyaml
 
 mkdir -p ${GITHUB_WORKSPACE}/upload
 cd ${GITHUB_WORKSPACE}/terraform
