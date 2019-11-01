@@ -27,8 +27,8 @@ class Config:
 def bind_action_dic(config):
     global action_api_uri_dic
     action_api_uri_dic = {
-        "get_listings": "appstore/publisher/v1/listings",
-        "get_listing": f"appstore/publisher/v1/applications/{config.listingVersionId}",
+        "get_listingVersions": "appstore/publisher/v1/listings",
+        "get_listingVersion": f"appstore/publisher/v1/applications/{config.listingVersionId}",
         "get_artifacts": "appstore/publisher/v1/artifacts",
         "get_artifact": f"appstore/publisher/v1/artifacts/{config.artifactId}",
         "get_applications": "appstore/publisher/v1/applications",

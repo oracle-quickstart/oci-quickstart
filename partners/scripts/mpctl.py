@@ -7,10 +7,10 @@ from partners.scripts.mpapihelper import *
 # usage:
 #
 #   get one listing
-#       python3 mpctl.py -creds <partner> -action get_listing -listingVersionId <listingVersionId>
+#       python3 mpctl.py -creds <partner> -action get_listingVersion -listingVersionId <listingVersionId>
 #
 #   get all listings
-#       python3 mpctl.py -creds <partner> -action get_listings
+#       python3 mpctl.py -creds <partner> -action get_listingVersions
 #
 #   build one listing tree
 #       python3 mpctl.py -creds <partner> -action build_listings -listingVersionId <listingVersionId>
@@ -82,22 +82,22 @@ class Package:
         return ppstring
 
 
-class Listing:
+class ListingVersion:
     packageVersions = []
-    listing = ''
-    listingDetails = ''
+    listingVersion = ''
+    listingVersionDetails = ''
     packages = []
 
-    def __init__(self, listing):
+    def __init__(self, listingVersion):
         global config
         self.packages = []
-        self.listing = listing
-        if "packageVersions" in self.listing:
-            self.packageVersions = self.listing["packageVersions"]
+        self.listingVersion = listingVersion
+        if "packageVersions" in self.listingVersion:
+            self.packageVersions = self.listingVersion["packageVersions"]
 
-        config.action = "get_listing"
-        config.listingVersionId = self.listing["listingVersionId"]
-        self.listingDetails = do_get_action(config)
+        config.action = "get_listingVersion"
+        config.listingVersionId = self.listingVersion["listingVersionId"]
+        self.listingVersionDetails = do_get_action(config)
 
         config.action = "get_application_packages"
         packages = do_get_action(config)
@@ -108,8 +108,8 @@ class Listing:
 
     def __str__(self):
         ppstring = ''
-        ppstring += json.dumps(self.listing, indent=4, sort_keys=False)
-        ppstring += json.dumps(self.listingDetails, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
         ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
         for package in self.packages:
             ppstring += str(package)
@@ -152,24 +152,24 @@ class Terms():
 
 
 class Partner:
-    listings = []
+    listingVersions = []
     terms = []
 
     def __init__(self):
         global config
         if config.listingVersionId is None:
-            config.action = "get_listings"
+            config.action = "get_listingVersions"
         else:
-            config.action = "get_listing"
-        listings = do_get_action(config)
+            config.action = "get_listingVersion"
+        listingVersions = do_get_action(config)
 
-        if "items" in listings:
-            for item in listings["items"]:
-                l = Listing(item["GenericListing"])
-                self.listings.append(l)
+        if "items" in listingVersions:
+            for item in listingVersions["items"]:
+                l = ListingVersion(item["GenericListing"])
+                self.listingVersions.append(l)
         else:
-            l = Listing(listings)
-            self.listings.append(l)
+            l = ListingVersion(listingVersions)
+            self.listingVersions.append(l)
 
         config.action = "get_terms"
         terms = do_get_action(config)
@@ -185,8 +185,8 @@ class Partner:
 
     def __str__(self):
         ppstring = ''
-        for listing in self.listings:
-            ppstring += str(listing)
+        for listingVersion in self.listingVersions:
+            ppstring += str(listingVersion)
         for terms in self.terms:
             ppstring += str(terms)
         return ppstring
