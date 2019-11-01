@@ -1,23 +1,27 @@
-import io
-import json
 import argparse
 from partners.scripts.mpapihelper import *
 
-####################################
+#######################################################################################################################
 #
 # usage:
 #
+#   get one listing
+#       python3 mpctl.py -creds <partner> -action get_listing -listingVersionId <listingVersionId>
 #
+#   get all listings
+#       python3 mpctl.py -creds <partner> -action get_listings
 #
+#   build one listing tree
+#       python3 mpctl.py -creds <partner> -action build_listings -listingVersionId <listingVersionId>
 #
+#   build all listings trees for partner
+#       python3 mpctl.py -creds <partner> -action build_listings
 #
+#   update stack listing with new terraform template
+#       python3 mpctl.py -creds <partner> -action update_stack -listingVersionId <listingVersionId>
+#           -versionString <versionString> -fileName <fileName>
 #
-#
-#
-#
-#
-#
-####################################
+#######################################################################################################################
 
 
 action_api_uri_dic = []
@@ -37,9 +41,9 @@ parser.add_argument('-termsVersionId', type=int,
                     help='the terms version to act on')
 parser.add_argument('-artifactId', type=int,
                     help='the artifact to act on')
-parser.add_argument('-filename',
+parser.add_argument('-fileName',
                     help='the name of the TF file')
-parser.add_argument('-version_string',
+parser.add_argument('-versionString',
                     help='the new version for update')
 
 args = parser.parse_args()
@@ -233,13 +237,13 @@ def do_update_stack():
     newPackageVersionId = get_new_packageVersionId(config, newVersionId, newPackageId)
 
     # update versioned package details
-    message = update_versioned_package_version(config, newPackageVersionId, args.version_string)
+    message = update_versioned_package_version(config, newPackageVersionId, args.versionString)
 
     # create new artifact
-    artifactId = create_new_artifact(config, args.version_string, 'tf.zip')
+    artifactId = create_new_artifact(config, args.versionString, args.fileName)
 
     # update versioned package details - associate newly created artifact
-    message = associate_artifact_with_package(config, artifactId, newPackageVersionId, args.version_string)
+    message = associate_artifact_with_package(config, artifactId, newPackageVersionId, args.versionString)
 
     return message
 
