@@ -1,4 +1,5 @@
 import argparse
+import json
 from partners.scripts.mpapihelper import *
 
 #######################################################################################################################
@@ -25,28 +26,6 @@ from partners.scripts.mpapihelper import *
 
 
 action_api_uri_dic = []
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-creds',
-                    help='the name of the creds file to use')
-parser.add_argument('-action',
-                    help='the action to perform')
-parser.add_argument('-listingVersionId', type=int,
-                    help='the listing version to act on')
-parser.add_argument('-packageVersionId', type=int,
-                    help='the package version to act on')
-parser.add_argument('-termsId', type=int,
-                    help='the terms to act on')
-parser.add_argument('-termsVersionId', type=int,
-                    help='the terms version to act on')
-parser.add_argument('-artifactId', type=int,
-                    help='the artifact to act on')
-parser.add_argument('-fileName',
-                    help='the name of the TF file')
-parser.add_argument('-versionString',
-                    help='the new version for update')
-
-args = parser.parse_args()
 config = None
 
 
@@ -247,31 +226,53 @@ def do_update_stack():
 
     return message
 
+if __name__  == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-creds',
+                        help='the name of the creds file to use')
+    parser.add_argument('-action',
+                        help='the action to perform')
+    parser.add_argument('-listingVersionId', type=int,
+                        help='the listing version to act on')
+    parser.add_argument('-packageVersionId', type=int,
+                        help='the package version to act on')
+    parser.add_argument('-termsId', type=int,
+                        help='the terms to act on')
+    parser.add_argument('-termsVersionId', type=int,
+                        help='the terms version to act on')
+    parser.add_argument('-artifactId', type=int,
+                        help='the artifact to act on')
+    parser.add_argument('-fileName',
+                        help='the name of the TF file')
+    parser.add_argument('-versionString',
+                        help='the new version for update')
 
-config = Config(args.creds)
-if args.artifactId is not None:
-    config.artifactId = args.artifactId
-if args.action is not None:
-    config.action = args.action
-if args.listingVersionId is not None:
-    config.listingVersionId = args.listingVersionId
-if args.packageVersionId is not None:
-    config.packageVersionId = args.packageVersionId
-if args.termsId is not None:
-    config.termsId = args.termsId
-if args.termsVersionId is not None:
-    config.termsVersionId = args.termsVersionId
+    args = parser.parse_args()
 
-if "get" in args.action:
-    r_json = do_get_action(config)
-    print(json.dumps(r_json, indent=4, sort_keys=True))
+    config = Config(args.creds)
+    if args.artifactId is not None:
+        config.artifactId = args.artifactId
+    if args.action is not None:
+        config.action = args.action
+    if args.listingVersionId is not None:
+        config.listingVersionId = args.listingVersionId
+    if args.packageVersionId is not None:
+        config.packageVersionId = args.packageVersionId
+    if args.termsId is not None:
+        config.termsId = args.termsId
+    if args.termsVersionId is not None:
+        config.termsVersionId = args.termsVersionId
 
-if "create" in args.action:
-    do_create()
+    if "get" in args.action:
+        r_json = do_get_action(config)
+        print(json.dumps(r_json, indent=4, sort_keys=True))
 
-if "build" in args.action:
-    partner = Partner()
-    print(partner)
+    if "create" in args.action:
+        do_create()
 
-if "update_stack" in args.action:
-    print(do_update_stack())
+    if "build" in args.action:
+        partner = Partner()
+        print(partner)
+
+    if "update_stack" in args.action:
+        print(do_update_stack())
