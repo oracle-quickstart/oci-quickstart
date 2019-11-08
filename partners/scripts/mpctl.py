@@ -24,10 +24,8 @@ from partners.scripts.mpapihelper import *
 #
 #######################################################################################################################
 
-
 action_api_uri_dic = []
 config = None
-
 
 class ArtifactVersion:
     details = []
@@ -37,6 +35,7 @@ class ArtifactVersion:
 
     def __str__(self):
         ppstring = ''
+        ppstring += "\n"
         ppstring += json.dumps(self.details, indent=4, sort_keys=False)
         return ppstring
 
@@ -57,11 +56,12 @@ class Artifact:
 
     def __str__(self):
         ppstring = ''
+        ppstring += "\n"
         ppstring += json.dumps(self.resource, indent=4, sort_keys=False)
         for version in self.versions:
+            ppstring += "\n"
             ppstring += str(version)
         return ppstring
-
 
 class Package:
     package = []
@@ -76,11 +76,12 @@ class Package:
 
     def __str__(self):
         ppstring = ''
+        ppstring += "\n"
         ppstring += json.dumps(self.package, indent=4, sort_keys=False)
         for artifact in self.artifacts:
+            ppstring += "\n"
             ppstring += str(artifact)
         return ppstring
-
 
 class ListingVersion:
     packageVersions = []
@@ -108,13 +109,31 @@ class ListingVersion:
 
     def __str__(self):
         ppstring = ''
+        ppstring += "\n"
         ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
+        ppstring += "\n"
         ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
+        ppstring += "\n"
         ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
         for package in self.packages:
             ppstring += str(package)
+            pass
         return ppstring
 
+class Listing:
+    listingVersions = []
+    listingId = 0
+
+    def __init__(self, listingVersion):
+        self.listingId = listingVersion["listingId"]
+        self.listingVersions = [ListingVersion(listingVersion)]
+
+    def __str__(self):
+        ppstring = ''
+        for listingVersion in self.listingVersions:
+            ppstring += "\n"
+            ppstring += str(listingVersion)
+        return ppstring
 
 class TermVersion():
     termVersion = []
@@ -129,7 +148,6 @@ class TermVersion():
 
     def __str__(self):
         return json.dumps(self.termVersion, indent=4, sort_keys=False)
-
 
 class Terms():
     terms = []
@@ -150,9 +168,9 @@ class Terms():
             ppstring += str(termVersion)
         return ppstring
 
-
 class Partner:
-    listingVersions = []
+
+    listings = []
     terms = []
 
     def __init__(self):
@@ -165,11 +183,21 @@ class Partner:
 
         if "items" in listingVersions:
             for item in listingVersions["items"]:
-                l = ListingVersion(item["GenericListing"])
-                self.listingVersions.append(l)
+
+                found = False
+                for listing in self.listings:
+                    if listing.listingId == item["GenericListing"]["listingId"]:
+                        listing.listingVersions.append(ListingVersion(item["GenericListing"]))
+                        found = True
+                        break
+
+                if not found:
+                    listing = Listing(item["GenericListing"])
+                    self.listings.append(listing)
+
         else:
-            l = ListingVersion(listingVersions)
-            self.listingVersions.append(l)
+            listing = Listing(listingVersions)
+            self.listings.append(listing)
 
         config.action = "get_terms"
         terms = do_get_action(config)
@@ -181,12 +209,14 @@ class Partner:
             t = Terms(terms)
             self.terms.append(t)
 
-        pass
-
     def __str__(self):
         ppstring = ''
-        for listingVersion in self.listingVersions:
-            ppstring += str(listingVersion)
+        ppstring += (f"The parnter has {len(self.listings)} listing(s)")
+        ppstring += "\n"
+        for listing in self.listings:
+            ppstring += str(listing)
+            ppstring += "\n"
+        ppstring += "\n"
         for terms in self.terms:
             ppstring += str(terms)
         return ppstring
