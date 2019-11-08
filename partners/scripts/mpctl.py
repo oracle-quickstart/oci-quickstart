@@ -16,7 +16,7 @@ from partners.scripts.mpapihelper import *
 #       python3 mpctl.py -creds <partner> -action build_listings -listingVersionId <listingVersionId>
 #
 #   build all listings trees for partner
-#       python3 mpctl.py -creds <partner> -action build_listings
+#       python3 mpctl.py -creds <partner> -action build_listings [-publishedOnly]
 #
 #   update stack listing with new terraform template
 #       python3 mpctl.py -creds <partner> -action update_stack -listingVersionId <listingVersionId>
@@ -104,6 +104,8 @@ class ListingVersion:
         packages = do_get_action(config)
 
         for package in packages["items"]:
+            if args.publishedOnly and package["Package"]["status"]["code"] == "unpublished":
+                continue
             p = Package(package)
             self.packages.append(p)
 
@@ -183,7 +185,8 @@ class Partner:
 
         if "items" in listingVersions:
             for item in listingVersions["items"]:
-
+                if args.publishedOnly and item["GenericListing"]["status"]["code"] == "UNPUBLISHED" :
+                    continue
                 found = False
                 for listing in self.listings:
                     if listing.listingId == item["GenericListing"]["listingId"]:
@@ -262,6 +265,8 @@ if __name__  == "__main__":
                         help='the name of the creds file to use')
     parser.add_argument('-action',
                         help='the action to perform')
+    parser.add_argument('-publishedOnly', action='store_true',
+                        help='only build tree for published listings')
     parser.add_argument('-listingVersionId', type=int,
                         help='the listing version to act on')
     parser.add_argument('-packageVersionId', type=int,
