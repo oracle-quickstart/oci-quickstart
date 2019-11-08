@@ -224,9 +224,6 @@ class Partner:
             ppstring += str(terms)
         return ppstring
 
-def do_build():
-    return partner
-
 def do_create():
     global config
     create_listing(config)
