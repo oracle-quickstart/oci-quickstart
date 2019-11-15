@@ -8,6 +8,7 @@ access_token = ''
 creds = []
 api_url = "https://ocm-apis-cloud.oracle.com/"
 form_data_api_headers = ''
+put_api_headers = ''
 get_api_headers = ''
 
 class Config:
@@ -48,6 +49,7 @@ def set_access_token(partnerName):
     global creds
     global form_data_api_headers
     global get_api_headers
+    global put_api_headers
     with open(partnerName + "_creds.yaml", 'r') as stream:
         creds = yaml.safe_load(stream)
 
@@ -68,9 +70,13 @@ def set_access_token(partnerName):
 
     access_token = json.loads(r.text).get('access_token')
 
-    form_data_api_headers = {'Content-Type': 'multipart/form-data', 'boundary': '----WebKitFormBoundary7MA4YWxkTrZu0gW',
+    form_data_api_headers = {'Content-Type': 'multipart/form-data',
                              'charset': 'UTF-8',
                              'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+
+    put_api_headers = {'charset': 'UTF-8',
+                             'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+
     get_api_headers = {'Content-Type': 'application/json', 'charset': 'UTF-8',
                    'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
@@ -114,10 +120,9 @@ def update_versioned_package_version(config, newPackageVersionId, versionString)
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"version": "' + versionString + '", "description": "Description of package", "tncId": "' + str(
-        config.termsVersionsId) + '", "serviceType": "OCIOrchestration"}'
-    body_json = json.loads(body)
-    r = requests.put(uri, headers=form_data_api_headers, json=body_json)
+    body = '{"version": "' + versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
+    payload = {'json': (None, body)}
+    r = requests.put(uri, headers=put_api_headers, files=payload)
     r_json = json.loads(r.text)
     return r_json["message"]
 
@@ -127,9 +132,9 @@ def create_new_artifact(config, versionString, fileName):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body = '{"name": "TF_' + versionString + '", "artifactType:": "TERRAFORM_TEMPLATE"}'
-    body_json = json.loads(body)
-    files = {'upload_file': open(fileName, 'rb')}
-    r = requests.post(uri, headers=form_data_api_headers, json=body_json, files=files)
+    payload = {'json': (None, body)}
+    files = {'file': open(fileName, 'rb')}
+    r = requests.post(uri, headers=put_api_headers, files=files, data=payload)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
