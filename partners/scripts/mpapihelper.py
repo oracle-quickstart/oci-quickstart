@@ -153,17 +153,22 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     return r_json["entityId"]
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId, versionString):
-    with open("newArtifact", "r") as file_in:
+    with open("newArtifact.json", "r") as file_in:
         body = file_in.read()
-    body.replace("%%ARTID%%", artifactId)
-    body.replace("%%VERS%%", versionString)
-    body_json = json.loads(body)
+    body = body.replace("%%ARTID%%", artifactId)
+    body = body.replace("%%VERS%%", versionString)
+
+    if config.imageOcid is not None:
+        body = body.replace("Orchestration", "")
+        body = body.replace("terraform", "ocimachineimage")
+
+    payload = {'json': (None, body)}
     config.action = "get_application_package"
     config.packageVersionId = newPackageVersionId
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.put(uri, headers=form_data_api_headers, json=body_json)
+    r = requests.put(uri, headers=put_api_headers, files=payload)
     r_json = json.loads(r.text)
     return r_json["message"]
 

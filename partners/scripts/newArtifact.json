@@ -13,17 +13,8 @@
                   "value":"TFArtifact_%%VERS%%"
                 }
              ]
-          },
-           {
-                  "name": "compartmentId",
-                  "source": "end_user",
-                  "displayName": "Compartment ID",
-                  "dataType": "string",
-                  "mandatory": true,
-                  "custom": false,
-                  "cardinality": "SINGLE_VALUE"
-              }
-          ]
+          }
+       ]
     }
  ]
 }
