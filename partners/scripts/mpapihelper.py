@@ -173,6 +173,16 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId, ver
     r_json = json.loads(r.text)
     return r_json["message"]
 
+def submit_listing(config):
+    config.action = "get_listingVersion"
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    body = '{"action": "submit", "note": "submitting new version"}'
+    r = requests.patch(uri, headers=get_api_headers, data=body)
+    r_json = json.loads(r.text)
+    return r_json["message"]
+
 def create_listing(config):
 
     apicall = f"appstore/publisher/v1/applications"

@@ -261,6 +261,9 @@ def do_update_listing():
     # update versioned package details - associate newly created artifact
     message = associate_artifact_with_package(config, artifactId, newPackageVersionId, args.versionString)
 
+    # submit the new version of the listing for approval
+    message = submit_listing(config)
+
     return message
 
 if __name__  == "__main__":
