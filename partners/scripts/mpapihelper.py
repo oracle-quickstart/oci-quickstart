@@ -20,6 +20,7 @@ class Config:
     termsVersionId = None
     action = None
     access_token = None
+    imageOcid = None
 
     def __init__(self, partnerName):
         if self.access_token is None:
@@ -40,7 +41,7 @@ def bind_action_dic(config):
         "get_terms": "appstore/publisher/v1/terms",
         "get_terms_version": f"appstore/publisher/v1/terms/{config.termsId}/version/{config.termsVersionId}",
         "create_listing": f"appstore/publisher/v1/applications",
-        "update_stack": f"appstore/publisher/v1/applications/{config.listingVersionId}/version",
+        "create_new_version": f"appstore/publisher/v1/applications/{config.listingVersionId}/version",
         "new_package_version": f"appstore/publisher/v2/applications/{config.listingVersionId}/packages/{config.packageVersionId}/version",
     }
 
@@ -89,7 +90,7 @@ def do_get_action(config):
     return r_json
 
 def get_new_versionId(config):
-    config.action = "update_stack"
+    config.action = "create_new_version"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
@@ -126,15 +127,28 @@ def update_versioned_package_version(config, newPackageVersionId, versionString)
     r_json = json.loads(r.text)
     return r_json["message"]
 
-def create_new_artifact(config, versionString, fileName):
+def create_new_stack_artifact(config, versionString, fileName):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"name": "TF_' + versionString + '", "artifactType:": "TERRAFORM_TEMPLATE"}'
+    body = '{"name": "TF_' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     files = {'file': open(fileName, 'rb')}
     r = requests.post(uri, headers=put_api_headers, files=files, data=payload)
+    r_json = json.loads(r.text)
+    return r_json["entityId"]
+
+def create_new_image_artifact(config, versionString, old_listing_artifact_version):
+    config.action = "get_artifacts"
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
+    new_version['source']['uniqueIdentifier'] = config.imageOcid
+    body = json.dumps(new_version)
+    payload = {'json': (None, body)}
+    r = requests.post(uri, headers=get_api_headers, files=payload)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 

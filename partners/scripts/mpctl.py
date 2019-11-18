@@ -18,8 +18,8 @@ from partners.scripts.mpapihelper import *
 #   build all listings trees for partner
 #       python3 mpctl.py -creds <partner> -action build_listings [-includeUnpublished]
 #
-#   update stack listing with new terraform template
-#       python3 mpctl.py -creds <partner> -action update_stack -listingVersionId <listingVersionId>
+#   update listing with new terraform template or new image
+#       python3 mpctl.py -creds <partner> -action update_listing -listingVersionId <listingVersionId>
 #           -versionString <versionString> -fileName <fileName>
 #
 #######################################################################################################################
@@ -228,13 +228,16 @@ def do_create():
     global config
     create_listing(config)
 
-def do_update_stack():
+def do_update_listing():
     global config
     partner = Partner()
 
-    # tcnId = partner.terms[0].termVersions[0].termVersion["termsVersionId"]
-    tcnId = partner.terms[0].termVersions[0].termVersion["contentId"]
-    config.termsVersionsId = tcnId
+    #tcnId = partner.terms[0].termVersions[0].termVersion["termsVersionId"]
+    #tcnId = partner.terms[0].termVersions[0].termVersion["contentId"]
+    #config.termsVersionsId = tcnId
+
+    if config.imageOcid is not None:
+        old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
 
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
@@ -248,8 +251,12 @@ def do_update_stack():
     # update versioned package details
     message = update_versioned_package_version(config, newPackageVersionId, args.versionString)
 
-    # create new artifact
-    artifactId = create_new_artifact(config, args.versionString, args.fileName)
+    if config.imageOcid is None:
+        # create new artifact for stack listing
+        artifactId = create_new_stack_artifact(config, args.versionString, args.fileName)
+    else:
+        # create new artifact for iamge listing
+        artifactId = create_new_image_artifact(config, args.versionString, old_listing_artifact_version)
 
     # update versioned package details - associate newly created artifact
     message = associate_artifact_with_package(config, artifactId, newPackageVersionId, args.versionString)
@@ -278,6 +285,8 @@ if __name__  == "__main__":
                         help='the name of the TF file')
     parser.add_argument('-versionString',
                         help='the new version for update')
+    parser.add_argument('-imageOcid',
+                       help='the ocid of the update image')
 
     args = parser.parse_args()
 
@@ -294,6 +303,8 @@ if __name__  == "__main__":
         config.termsId = args.termsId
     if args.termsVersionId is not None:
         config.termsVersionId = args.termsVersionId
+    if args.imageOcid is not None:
+        config.imageOcid = args.imageOcid
 
     if "get" in args.action:
         r_json = do_get_action(config)
@@ -306,5 +317,5 @@ if __name__  == "__main__":
         partner = Partner()
         print(partner)
 
-    if "update_stack" in args.action:
-        print(do_update_stack())
+    if "update_listing" in args.action:
+        print(do_update_listing())
