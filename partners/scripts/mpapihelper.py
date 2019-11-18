@@ -148,9 +148,7 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     new_version['name'] = versionString
     new_version['source']['uniqueIdentifier'] = config.imageOcid
     new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
-    new_version["source"]["regionCode"] = "IAD"
     body = json.dumps(new_version)
-    get_api_headers['accept'] = "application/json"
     r = requests.post(uri, headers=get_api_headers, data=body)
     r_json = json.loads(r.text)
     return r_json["entityId"]
