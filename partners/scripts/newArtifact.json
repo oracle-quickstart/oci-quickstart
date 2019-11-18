@@ -10,7 +10,7 @@
              "valueProperties":[
                 {
                   "name":"name",
-                  "value":"TFArtifact_%%VERS%%"
+                  "value":"%%VERS%%"
                 }
              ]
           }

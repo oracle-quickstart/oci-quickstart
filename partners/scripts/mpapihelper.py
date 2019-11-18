@@ -78,7 +78,7 @@ def set_access_token(partnerName):
     put_api_headers = {'charset': 'UTF-8',
                              'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
-    get_api_headers = {'Content-Type': 'application/json', 'charset': 'UTF-8',
+    get_api_headers = {'Content-Type': 'application/json', 'charset': 'UTF8',
                    'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
 def do_get_action(config):
@@ -132,7 +132,7 @@ def create_new_stack_artifact(config, versionString, fileName):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"name": "TF_' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
+    body = '{"name": "' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     files = {'file': open(fileName, 'rb')}
     r = requests.post(uri, headers=put_api_headers, files=files, data=payload)
@@ -145,10 +145,13 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
+    new_version['name'] = versionString
     new_version['source']['uniqueIdentifier'] = config.imageOcid
+    new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
+    new_version["source"]["regionCode"] = "IAD"
     body = json.dumps(new_version)
-    payload = {'json': (None, body)}
-    r = requests.post(uri, headers=get_api_headers, files=payload)
+    get_api_headers['accept'] = "application/json"
+    r = requests.post(uri, headers=get_api_headers, data=body)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
