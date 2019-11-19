@@ -1,6 +1,7 @@
 #!/bin/bash
 apt-get update
-apt install -y build-essential zip python3 pyyaml
+apt install -y build-essential zip python3 pip3
+pip3 install pyyaml
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api.creds
 
