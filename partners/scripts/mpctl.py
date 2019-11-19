@@ -18,9 +18,13 @@ from partners.scripts.mpapihelper import *
 #   build all listings trees for partner
 #       python3 mpctl.py -creds <partner> -action build_listings [-includeUnpublished]
 #
-#   update listing with new terraform template or new image
+#   update listing with new terraform template
 #       python3 mpctl.py -creds <partner> -action update_listing -listingVersionId <listingVersionId>
 #           -versionString <versionString> -fileName <fileName>
+#
+#   update listing with new image
+#       python3 mpctl.py -creds <partner> -action update_listing -listingVersionId <listingVersionId>
+#           -versionString <versionString> -imageOcid <imageOcid>
 #
 #######################################################################################################################
 
