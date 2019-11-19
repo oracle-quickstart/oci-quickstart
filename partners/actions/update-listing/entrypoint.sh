@@ -1,6 +1,6 @@
 #!/bin/bash
 apt-get update
-apt-get install -y zip python3.6 python-yaml
+apt install -y zip python3.6 python-yaml
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api.creds
 
