@@ -2,6 +2,7 @@ import requests
 import base64
 import yaml
 import json
+import os.path
 
 action_api_uri_dic = []
 access_token = ''
@@ -51,8 +52,13 @@ def set_access_token(partnerName):
     global form_data_api_headers
     global get_api_headers
     global put_api_headers
-    with open(partnerName + "_creds.yaml", 'r') as stream:
-        creds = yaml.safe_load(stream)
+
+    if os.path.isfile(partnerName + "_creds.yaml"):
+        with open(partnerName + "_creds.yaml", 'r') as stream:
+            creds = yaml.safe_load(stream)
+    else:
+        with open("api_creds.yaml", 'r') as stream:
+            creds = yaml.safe_load(stream)
 
     auth_string = creds['client_id']
     auth_string += ':'
