@@ -1,6 +1,6 @@
 #!/bin/bash
 apt-get update
-apt install -y zip python3.6 python-yaml
+apt install -y build-essentials zip python3.6 python-yaml
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api.creds
 
