@@ -1,4 +1,9 @@
 #!/bin/bash
+
+echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
+echo $(cat ${GITHUB_WORKSPACE}/api_creds.yaml)
+
+
 apt-get update
 apt install -y build-essential unzip go-dep
 
