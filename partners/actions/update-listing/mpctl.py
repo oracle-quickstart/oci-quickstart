@@ -294,6 +294,8 @@ if __name__  == "__main__":
                         help='the new version for update')
     parser.add_argument('-imageOcid',
                        help='the ocid of the update image')
+    parser.add_argument('-credsFile',
+                        help='(optional) the path to the creds file')
 
     args = parser.parse_args()
 
@@ -312,6 +314,8 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
+    if args.credsFile is not None:
+        config.credsFile = args.credsFile
 
     if "get" in args.action:
         r_json = do_get_action(config)

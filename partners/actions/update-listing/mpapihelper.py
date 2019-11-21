@@ -22,10 +22,11 @@ class Config:
     action = None
     access_token = None
     imageOcid = None
+    credsFile = None
 
     def __init__(self, partnerName):
         if self.access_token is None:
-            set_access_token(partnerName)
+            set_access_token(partnerName, credsFile)
 
 def bind_action_dic(config):
     global action_api_uri_dic
@@ -46,7 +47,7 @@ def bind_action_dic(config):
         "new_package_version": f"appstore/publisher/v2/applications/{config.listingVersionId}/packages/{config.packageVersionId}/version",
     }
 
-def set_access_token(partnerName):
+def set_access_token(partnerName, credsFile):
     global access_token
     global creds
     global form_data_api_headers
@@ -57,7 +58,7 @@ def set_access_token(partnerName):
         with open(partnerName + "_creds.yaml", 'r') as stream:
             creds = yaml.safe_load(stream)
     else:
-        with open("api_creds.yaml", 'r') as stream:
+        with open(credsFile, 'r') as stream:
             creds = yaml.safe_load(stream)
 
     auth_string = creds['client_id']
