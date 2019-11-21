@@ -53,7 +53,7 @@ def set_access_token(partnerName):
     global get_api_headers
     global put_api_headers
 
-    if os.path.isfile(partnerName + "_creds.yaml"):
+    if partnerName is not None and os.path.isfile(partnerName + "_creds.yaml"):
         with open(partnerName + "_creds.yaml", 'r') as stream:
             creds = yaml.safe_load(stream)
     else:
