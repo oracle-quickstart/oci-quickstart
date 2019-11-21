@@ -9,7 +9,7 @@ export LISTING_ID=$(cat ${GITHUB_WORKSPACE}/ListingId)
 export VERSION_STRING=$(cat ${GITHUB_WORKSPACE}/Version)
 export ZIP_NAME=$(ls ${GITHUB_WORKSPACE}/upload)
 
-python /mpctl.py -action update_listing -listingVersionId $LISTING_ID -versionString $VERSION_STRING -fileName $ZIP_NAME
+python /mpctl.py -action update_listing -listingVersionId $LISTING_ID -versionString "$VERSION_STRING" -fileName $ZIP_NAME
 
 #echo "The OCID of the dummy image to be used in the listing update is: "
 #cat ${GITHUB_WORKSPACE}/ocid.txt
