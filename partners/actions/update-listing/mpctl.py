@@ -1,6 +1,6 @@
 import argparse
 import json
-from partners.scripts.mpapihelper import *
+from mpapihelper import *
 
 #######################################################################################################################
 #
