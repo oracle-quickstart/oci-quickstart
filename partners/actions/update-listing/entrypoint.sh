@@ -3,7 +3,7 @@
 #apt install -y build-essential zip python3.6 python-yaml
 #apt install -y PyYAML
 
-echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api.creds
+echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
 export LISTING_ID=$(cat ${GITHUB_WORKSPACE}/ListingId)
 export VERSION_STRING=$(cat ${GITHUB_WORKSPACE}/Version)
