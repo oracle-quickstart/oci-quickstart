@@ -93,6 +93,8 @@ def do_get_action(config):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     r = requests.get(uri, headers=get_api_headers)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json
 
@@ -102,6 +104,8 @@ def get_new_versionId(config):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     r = requests.post(uri, headers=get_api_headers)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
@@ -119,6 +123,8 @@ def get_new_packageVersionId(config, newVersionId, newPackageId):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     r = requests.patch(uri, headers=get_api_headers)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
@@ -131,6 +137,8 @@ def update_versioned_package_version(config, newPackageVersionId, versionString)
     body = '{"version": "' + versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
     payload = {'json': (None, body)}
     r = requests.put(uri, headers=put_api_headers, files=payload)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["message"]
 
@@ -143,6 +151,8 @@ def create_new_stack_artifact(config, versionString, fileName):
     payload = {'json': (None, body)}
     files = {'file': open(fileName, 'rb')}
     r = requests.post(uri, headers=put_api_headers, files=files, data=payload)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
@@ -157,6 +167,8 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
     body = json.dumps(new_version)
     r = requests.post(uri, headers=get_api_headers, data=body)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
@@ -177,6 +189,8 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId, ver
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     r = requests.put(uri, headers=put_api_headers, files=payload)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["message"]
 
@@ -187,6 +201,8 @@ def submit_listing(config):
     uri = api_url + apicall
     body = '{"action": "submit", "note": "submitting new version"}'
     r = requests.patch(uri, headers=get_api_headers, data=body)
+    if r.status_code > 299:
+        print(r.text)
     r_json = json.loads(r.text)
     return r_json["message"]
 
