@@ -236,10 +236,6 @@ def do_update_listing():
     global config
     partner = Partner()
 
-    #tcnId = partner.terms[0].termVersions[0].termVersion["termsVersionId"]
-    #tcnId = partner.terms[0].termVersions[0].termVersion["contentId"]
-    #config.termsVersionsId = tcnId
-
     if config.imageOcid is not None:
         old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
 

@@ -9,8 +9,7 @@ access_token = ''
 creds = []
 api_url = "https://ocm-apis-cloud.oracle.com/"
 form_data_api_headers = ''
-put_api_headers = ''
-get_api_headers = ''
+api_headers = ''
 
 class Config:
 
@@ -50,9 +49,7 @@ def bind_action_dic(config):
 def set_access_token(partnerName, credsFile):
     global access_token
     global creds
-    global form_data_api_headers
-    global get_api_headers
-    global put_api_headers
+    global api_headers
 
     if partnerName is not None and os.path.isfile(partnerName + "_creds.yaml"):
         with open(partnerName + "_creds.yaml", 'r') as stream:
@@ -78,21 +75,15 @@ def set_access_token(partnerName, credsFile):
 
     access_token = json.loads(r.text).get('access_token')
 
-    form_data_api_headers = {'Content-Type': 'multipart/form-data',
-                             'charset': 'UTF-8',
+    api_headers = {'charset': 'UTF-8',
                              'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
-    put_api_headers = {'charset': 'UTF-8',
-                             'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
-
-    get_api_headers = {'Content-Type': 'application/json', 'charset': 'UTF8',
-                   'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
 def do_get_action(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.get(uri, headers=get_api_headers)
+    r = requests.get(uri, headers=api_headers)
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -103,7 +94,9 @@ def get_new_versionId(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.post(uri, headers=get_api_headers)
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.post(uri, headers=api_headers)
+    del api_headers['Content-Type']
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -122,7 +115,9 @@ def get_new_packageVersionId(config, newVersionId, newPackageId):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.patch(uri, headers=get_api_headers)
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.patch(uri, headers=api_headers)
+    del api_headers['Content-Type']
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -136,7 +131,7 @@ def update_versioned_package_version(config, newPackageVersionId, versionString)
     uri = api_url + apicall
     body = '{"version": "' + versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
     payload = {'json': (None, body)}
-    r = requests.put(uri, headers=put_api_headers, files=payload)
+    r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -150,7 +145,7 @@ def create_new_stack_artifact(config, versionString, fileName):
     body = '{"name": "' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     files = {'file': open(fileName, 'rb')}
-    r = requests.post(uri, headers=put_api_headers, files=files, data=payload)
+    r = requests.post(uri, headers=api_headers, files=files, data=payload)
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -166,7 +161,9 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     new_version['source']['uniqueIdentifier'] = config.imageOcid
     new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
     body = json.dumps(new_version)
-    r = requests.post(uri, headers=get_api_headers, data=body)
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.post(uri, headers=api_headers, data=body)
+    del api_headers['Content-Type']
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -188,7 +185,7 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId, ver
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.put(uri, headers=put_api_headers, files=payload)
+    r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -200,7 +197,9 @@ def submit_listing(config):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body = '{"action": "submit", "note": "submitting new version"}'
-    r = requests.patch(uri, headers=get_api_headers, data=body)
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.patch(uri, headers=api_headers, data=body)
+    del api_headers['Content-Type']
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
@@ -212,7 +211,8 @@ def create_listing(config):
     with open("testlisting.payload", "r") as file_in:
         body = file_in.read()
     body_json = json.loads(body)
-    r = requests.post(api_url + apicall, headers=get_api_headers, json=body_json)
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.post(api_url + apicall, headers=api_headers, json=body_json)
     print(r.text)
     r_json = json.loads(r.text)
     print(json.dumps(r_json, indent=4, sort_keys=False))
