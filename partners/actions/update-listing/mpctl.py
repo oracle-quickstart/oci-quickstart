@@ -299,7 +299,7 @@ if __name__  == "__main__":
 
     args = parser.parse_args()
 
-    config = Config(args.creds, args.credsFile)
+    config = Config(args.partner, args.credsFile)
     if args.artifactId is not None:
         config.artifactId = args.artifactId
     if args.action is not None:
@@ -314,8 +314,6 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-    if args.credsFile is not None:
-        config.credsFile = args.credsFile
 
     if "get" in args.action:
         r_json = do_get_action(config)
