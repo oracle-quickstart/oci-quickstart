@@ -7,23 +7,23 @@ from mpapihelper import *
 # usage:
 #
 #   get one listing
-#       python3 mpctl.py -creds <partner> -action get_listingVersion -listingVersionId <listingVersionId>
+#       python3 mpctl.py -partner <partner> -action get_listingVersion -listingVersionId <listingVersionId>
 #
 #   get all listings
-#       python3 mpctl.py -creds <partner> -action get_listingVersions
+#       python3 mpctl.py -partner <partner> -action get_listingVersions
 #
 #   build one listing tree
-#       python3 mpctl.py -creds <partner> -action build_listings -listingVersionId <listingVersionId>
+#       python3 mpctl.py -partner <partner> -action build_listings -listingVersionId <listingVersionId>
 #
 #   build all listings trees for partner
-#       python3 mpctl.py -creds <partner> -action build_listings [-includeUnpublished]
+#       python3 mpctl.py -partner <partner> -action build_listings [-includeUnpublished]
 #
 #   update listing with new terraform template
-#       python3 mpctl.py -creds <partner> -action update_listing -listingVersionId <listingVersionId>
+#       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
 #           -versionString <versionString> -fileName <fileName>
 #
 #   update listing with new image
-#       python3 mpctl.py -creds <partner> -action update_listing -listingVersionId <listingVersionId>
+#       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
 #           -versionString <versionString> -imageOcid <imageOcid>
 #
 #######################################################################################################################
@@ -272,8 +272,8 @@ def do_update_listing():
 
 if __name__  == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-creds',
-                        help='the name of the creds file to use')
+    parser.add_argument('-partner',
+                        help='the name of the partner to use')
     parser.add_argument('-action',
                         help='the action to perform')
     parser.add_argument('-includeUnpublished', action='store_true',
@@ -299,7 +299,7 @@ if __name__  == "__main__":
 
     args = parser.parse_args()
 
-    config = Config(args.creds)
+    config = Config(args.creds, args.credsFile)
     if args.artifactId is not None:
         config.artifactId = args.artifactId
     if args.action is not None:

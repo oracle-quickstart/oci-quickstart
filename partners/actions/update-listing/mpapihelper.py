@@ -24,7 +24,7 @@ class Config:
     imageOcid = None
     credsFile = None
 
-    def __init__(self, partnerName):
+    def __init__(self, partnerName, credsFile):
         if self.access_token is None:
             set_access_token(partnerName, credsFile)
 
