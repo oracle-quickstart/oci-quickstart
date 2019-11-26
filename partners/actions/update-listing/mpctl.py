@@ -1,5 +1,6 @@
 import argparse
 import json
+import os.path
 from mpapihelper import *
 
 #######################################################################################################################
@@ -28,8 +29,36 @@ from mpapihelper import *
 #
 #######################################################################################################################
 
-action_api_uri_dic = []
 config = None
+
+class ListingMetadata:
+
+    git_metadata = {}
+    api_metadata = {}
+
+    def __init__(self, file_name, lv):
+
+        self.git_metadata = {}
+        self.api_metadata = {}
+
+        if file_name is not None and os.path.isfile(file_name):
+            with open(file_name, 'r') as stream:
+                self.git_metadata = yaml.safe_load(stream)
+
+        if lv is not None:
+            lvd = lv.listingVersionDetails
+            self.api_metadata['name'] = lvd['name'] if 'name' in lvd else ''
+            self.api_metadata['shortDescription'] = lvd['shortDescription'] if 'shortDescription' in lvd else ''
+            self.api_metadata['longDescription'] = lvd['longDescription'] if 'longDescription' in lvd else ''
+            self.api_metadata['usageInformation'] = lvd['usageInformation'] if 'usageInformation' in lvd else ''
+            self.api_metadata['tags'] = lvd['tags'] if 'tags' in lvd else ''
+            self.api_metadata['tagLine'] = lvd['tagLine'] if 'tagLine' in lvd else ''
+            self.api_metadata['systemRequirements'] = lvd['systemRequirements'] if 'systemRequirements' in lvd else ''
+
+    def write_metadata(self, file_name):
+
+        with open(file_name, 'w+') as stream:
+            yaml.safe_dump(self.api_metadata, stream)
 
 class ArtifactVersion:
     details = []
@@ -92,18 +121,20 @@ class ListingVersion:
     listingVersion = ''
     listingVersionDetails = ''
     packages = []
+    listingMetadata = {}
 
     def __init__(self, listingVersion):
         global config
         self.packages = []
         self.listingVersion = listingVersion
+
         if "packageVersions" in self.listingVersion:
             self.packageVersions = self.listingVersion["packageVersions"]
 
         config.action = "get_listingVersion"
         config.listingVersionId = self.listingVersion["listingVersionId"]
         self.listingVersionDetails = do_get_action(config)
-
+        self.listingMetadata = ListingMetadata(args.metadataFile, self)
         config.action = "get_application_packages"
         packages = do_get_action(config)
 
@@ -292,6 +323,8 @@ if __name__  == "__main__":
                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
                         help='(optional) the path to the creds file')
+    parser.add_argument('-metadataFile',
+                        help='(optional) the path to the metadata file')
 
     args = parser.parse_args()
 
@@ -324,3 +357,8 @@ if __name__  == "__main__":
 
     if "update_listing" in args.action:
         print(do_update_listing())
+
+    if "dump_metadata" in args.action:
+        partner = Partner()
+        lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
+        lmd.write_metadata(args.metadataFile)

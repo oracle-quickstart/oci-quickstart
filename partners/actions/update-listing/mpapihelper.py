@@ -4,9 +4,9 @@ import yaml
 import json
 import os.path
 
-action_api_uri_dic = []
+action_api_uri_dic = {}
 access_token = ''
-creds = []
+creds = {}
 api_url = "https://ocm-apis-cloud.oracle.com/"
 form_data_api_headers = ''
 api_headers = ''
