@@ -203,7 +203,10 @@ def submit_listing(config):
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
-    return r_json["message"]
+    if "message" in r_json:
+        return r_json["message"]
+    else:
+        return "this partner has not yet been approved for auto approval. please contact MP admin."
 
 def create_listing(config):
 
