@@ -144,7 +144,9 @@ def create_new_stack_artifact(config, versionString, fileName):
     uri = api_url + apicall
     body = '{"name": "' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
-    files = {'file': open(fileName, 'rb')}
+    index = fileName.rfind("/")
+    name = fileName[index+1:]
+    files = {'file': (name, open(fileName, 'rb'))}
     r = requests.post(uri, headers=api_headers, files=files, data=payload)
     if r.status_code > 299:
         print(r.text)
