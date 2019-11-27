@@ -11,7 +11,7 @@ export ZIP_FILE=$(ls ${GITHUB_WORKSPACE}/upload)
 export ZIP_PATH=${GITHUB_WORKSPACE}/upload
 
 echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -listingVersionId $LISTING_ID -versionString '$VERSION_STRING' -fileName $ZIP_PATH/$ZIP_FILE"
-python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -listingVersionId $LISTING_ID -versionString '$VERSION_STRING' -fileName $ZIP_PATH/$ZIP_FILE
+python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -listingVersionId $LISTING_ID -versionString "$VERSION_STRING" -fileName $ZIP_PATH/$ZIP_FILE
 
 #echo "The OCID of the dummy image to be used in the listing update is: "
 #cat ${GITHUB_WORKSPACE}/ocid.txt
