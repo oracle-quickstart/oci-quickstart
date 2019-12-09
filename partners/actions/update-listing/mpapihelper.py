@@ -207,7 +207,9 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     return r_json["entityId"]
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId, versionString):
-    with open("/newArtifact.json", "r") as file_in:
+
+    file_name = "/newArtifact.json" if os.path.isfile("/newArtifact.json") else "newArtifact.json"
+    with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ARTID%%", artifactId)
     body = body.replace("%%VERS%%", versionString)
