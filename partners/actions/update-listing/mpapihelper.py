@@ -137,16 +137,16 @@ def update_version_metadata(config, newVersionId):
     else:
         return r.text
 
-def get_new_packageId(config, newVersionId):
+def get_packageId(config, newVersionId):
     config.action = "get_application_packages"
     config.listingVersionId = newVersionId
     r = do_get_action(config)
     return r["items"][0]["Package"]["id"]
 
-def get_new_packageVersionId(config, newVersionId, newPackageId):
+def get_new_packageVersionId(config, newVersionId, packageId):
     config.action = "new_package_version"
     config.listingVersionId = newVersionId
-    config.packageVersionId = newPackageId
+    config.packageVersionId = packageId
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
@@ -258,4 +258,45 @@ def create_listing(config):
     print(r.text)
     r_json = json.loads(r.text)
     print(json.dumps(r_json, indent=4, sort_keys=False))
+
+def create_new_listing(config):
+
+    config.action = "get_applications"
+    file_name = "/newListing.yaml" if os.path.isfile("/newListing.yaml") else "newListing.yaml"
+    with open(file_name, 'r') as stream:
+        new_listing_body = yaml.safe_load(stream)
+    if 'versionDetails' in new_listing_body:
+        vd = new_listing_body['versionDetails']
+        if 'releaseDate' in vd:
+            new_listing_body['versionDetails']['releaseDate'] = str(new_listing_body['versionDetails']['releaseDate'])
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    api_headers['Content-Type'] = 'application/json'
+    body = json.dumps(new_listing_body)
+    r = requests.post(uri, headers=api_headers, data=body)
+    del api_headers['Content-Type']
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    return r_json["entityId"]
+
+def create_new_package(config, artifactId, versionString):
+    file_name = "/newPackage.json" if os.path.isfile("/newPackage.json") else "newPackage.json"
+    with open(file_name, "r") as file_in:
+        body = file_in.read()
+    body = body.replace("%%ART_ID%%", artifactId)
+    body = body.replace("%%VER%%", versionString)
+    body = body.replace("%%DESC%%", versionString)
+
+    config.action = "get_application_packages"
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    payload = {'json': (None, body)}
+    r = requests.post(uri, headers=api_headers, files=payload)
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    return r_json["message"]
 

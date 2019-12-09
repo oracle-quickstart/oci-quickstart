@@ -264,7 +264,23 @@ class Partner:
 
 def do_create():
     global config
-    create_listing(config)
+
+    config.listingVersionId = create_new_listing(config)
+
+    if config.imageOcid is None:
+        # create new artifact for stack listing
+        artifactId = create_new_stack_artifact(config, args.versionString, args.fileName)
+    else:
+        # create new artifact for iamge listing
+        artifactId = create_new_image_artifact(config, args.versionString, None)
+
+
+    newPackageId = create_new_package(config, artifactId, args.versionString)
+
+    # submit the new version of the listing for approval
+    message = submit_listing(config)
+
+
 
 def do_update_listing():
     global config
@@ -283,10 +299,10 @@ def do_update_listing():
         updated_metadata_message = update_version_metadata(config, newVersionId)
 
     # get the package version id needed for package version creation
-    newPackageId = get_new_packageId(config, newVersionId)
+    packageId = get_packageId(config, newVersionId)
 
     # create a package version from existing package
-    newPackageVersionId = get_new_packageVersionId(config, newVersionId, newPackageId)
+    newPackageVersionId = get_new_packageVersionId(config, newVersionId, packageId)
 
     # update versioned package details
     message = update_versioned_package_version(config, newPackageVersionId, args.versionString)
@@ -369,6 +385,10 @@ if __name__  == "__main__":
     if "build" in args.action:
         partner = Partner()
         print(partner)
+
+        if args.listingVersionId is not None:
+            with open(args.partner + "_" + str(args.listingVersionId) + "_newListings.yaml", 'w+') as stream:
+                yaml.safe_dump(partner.listings[0].listingVersions[0].listingVersion, stream)
 
     if "update_listing" in args.action:
         print(do_update_listing())
