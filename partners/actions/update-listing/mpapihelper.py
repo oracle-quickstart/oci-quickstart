@@ -22,6 +22,8 @@ class Config:
     access_token = None
     imageOcid = None
     credsFile = None
+    updateMetadata = False
+    metadataFile = None
 
     def __init__(self, partnerName, credsFile):
         if self.access_token is None:
@@ -101,6 +103,39 @@ def get_new_versionId(config):
         print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
+
+def update_version_metadata(config, newVersionId):
+    config.action = "get_listingVersion"
+    config.listingVersionId = newVersionId
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    body_start = '{'
+    body_end = '}'
+    body = ""
+
+    with open(config.metadataFile,  "r") as stream:
+        metadata = yaml.safe_load(stream)
+
+    for k, v in metadata.items():
+        v = v.replace('"',"'")
+        body += f""""{k}": "{v}","""
+
+    body = body_start + body
+    body = body[:len(body) - 1]
+    body = body + body_end
+    body = body.encode("unicode_escape").decode("utf-8")
+
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.patch(uri, headers=api_headers, data=body)
+    del api_headers['Content-Type']
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    if "message" in r_json:
+        return r_json["message"]
+    else:
+        return r.text
 
 def get_new_packageId(config, newVersionId):
     config.action = "get_application_packages"

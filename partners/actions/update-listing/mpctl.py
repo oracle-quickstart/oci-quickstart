@@ -57,6 +57,9 @@ class ListingMetadata:
 
     def write_metadata(self, file_name):
 
+        if file_name is None:
+            file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
+
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
 
@@ -273,6 +276,12 @@ def do_update_listing():
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
+    # update metadata if requested
+    if args.updateMetadata:
+        file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
+        config.metadataFile = file_name
+        updated_metadata_message = update_version_metadata(config, newVersionId)
+
     # get the package version id needed for package version creation
     newPackageId = get_new_packageId(config, newVersionId)
 
@@ -325,6 +334,8 @@ if __name__  == "__main__":
                         help='(optional) the path to the creds file')
     parser.add_argument('-metadataFile',
                         help='(optional) the path to the metadata file')
+    parser.add_argument('-updateMetadata', action='store_true',
+                        help='read the [PartnerName]_metadata_[listingVersionId].yaml and use it to update listing')
 
     args = parser.parse_args()
 
@@ -343,6 +354,10 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
+    if args.updateMetadata:
+        config.updateMetadata = True
+
+
 
     if "get" in args.action:
         r_json = do_get_action(config)
