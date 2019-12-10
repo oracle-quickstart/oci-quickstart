@@ -291,7 +291,7 @@ def do_update_listing():
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
-    file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
+    file_name = f"metadata_{args.listingVersionId}.yaml"
     config.metadataFile = file_name
     updated_metadata_message = update_version_metadata(config, newVersionId)
 
