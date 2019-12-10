@@ -21,11 +21,10 @@ from mpapihelper import *
 #
 #   update listing with new terraform template
 #       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
-#           -versionString <versionString> -fileName <fileName>
-#
+#           -fileName <fileName>
 #   update listing with new image
 #       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
-#           -versionString <versionString> -imageOcid <imageOcid>
+#           -imageOcid <imageOcid>
 #
 #######################################################################################################################
 
@@ -269,17 +268,17 @@ def do_create():
 
     if config.imageOcid is None:
         # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.versionString, args.fileName)
+        artifactId = create_new_stack_artifact(config, args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, args.versionString, None)
+        artifactId = create_new_image_artifact(config, None)
 
 
-    newPackageId = create_new_package(config, artifactId, args.versionString)
+    newPackageId = create_new_package(config, artifactId)
 
     # submit the new version of the listing for approval
     message = submit_listing(config)
-
+    return message
 
 
 def do_update_listing():
@@ -292,11 +291,9 @@ def do_update_listing():
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
-    # update metadata if requested
-    if args.updateMetadata:
-        file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
-        config.metadataFile = file_name
-        updated_metadata_message = update_version_metadata(config, newVersionId)
+    file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
+    config.metadataFile = file_name
+    updated_metadata_message = update_version_metadata(config, newVersionId)
 
     # get the package version id needed for package version creation
     packageId = get_packageId(config, newVersionId)
@@ -305,17 +302,17 @@ def do_update_listing():
     newPackageVersionId = get_new_packageVersionId(config, newVersionId, packageId)
 
     # update versioned package details
-    message = update_versioned_package_version(config, newPackageVersionId, args.versionString)
+    message = update_versioned_package_version(config, newPackageVersionId)
 
     if config.imageOcid is None:
         # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.versionString, args.fileName)
+        artifactId = create_new_stack_artifact(config, args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, args.versionString, old_listing_artifact_version)
+        artifactId = create_new_image_artifact(config, old_listing_artifact_version)
 
     # update versioned package details - associate newly created artifact
-    message = associate_artifact_with_package(config, artifactId, newPackageVersionId, args.versionString)
+    message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
 
     # submit the new version of the listing for approval
     message = submit_listing(config)
@@ -342,16 +339,12 @@ if __name__  == "__main__":
                         help='the artifact to act on')
     parser.add_argument('-fileName',
                         help='the name of the TF file')
-    parser.add_argument('-versionString',
-                        help='the new version for update')
     parser.add_argument('-imageOcid',
                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
                         help='(optional) the path to the creds file')
     parser.add_argument('-metadataFile',
                         help='(optional) the path to the metadata file')
-    parser.add_argument('-updateMetadata', action='store_true',
-                        help='read the [PartnerName]_metadata_[listingVersionId].yaml and use it to update listing')
 
     args = parser.parse_args()
 
@@ -370,9 +363,6 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-    if args.updateMetadata:
-        config.updateMetadata = True
-
 
 
     if "get" in args.action:
@@ -380,7 +370,7 @@ if __name__  == "__main__":
         print(json.dumps(r_json, indent=4, sort_keys=True))
 
     if "create" in args.action:
-        do_create()
+        print(do_create())
 
     if "build" in args.action:
         partner = Partner()

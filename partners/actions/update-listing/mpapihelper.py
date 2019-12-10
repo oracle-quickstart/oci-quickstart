@@ -22,8 +22,8 @@ class Config:
     access_token = None
     imageOcid = None
     credsFile = None
-    updateMetadata = False
     metadataFile = None
+    versionString = None
 
     def __init__(self, partnerName, credsFile):
         if self.access_token is None:
@@ -117,6 +117,9 @@ def update_version_metadata(config, newVersionId):
     with open(config.metadataFile,  "r") as stream:
         metadata = yaml.safe_load(stream)
 
+    config.versionString = metadata['version']
+    del metadata['version']
+
     for k, v in metadata.items():
         v = v.replace('"',"'")
         body += f""""{k}": "{v}","""
@@ -158,13 +161,13 @@ def get_new_packageVersionId(config, newVersionId, packageId):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-def update_versioned_package_version(config, newPackageVersionId, versionString):
+def update_versioned_package_version(config, newPackageVersionId):
     config.action = "get_application_package"
     config.packageVersionId = newPackageVersionId
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"version": "' + versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
+    body = '{"version": "' + config.versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
     payload = {'json': (None, body)}
     r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
@@ -172,12 +175,12 @@ def update_versioned_package_version(config, newPackageVersionId, versionString)
     r_json = json.loads(r.text)
     return r_json["message"]
 
-def create_new_stack_artifact(config, versionString, fileName):
+def create_new_stack_artifact(config, fileName):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"name": "' + versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
+    body = '{"name": "' + config.versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     index = fileName.rfind("/")
     name = fileName[index+1:]
@@ -188,13 +191,13 @@ def create_new_stack_artifact(config, versionString, fileName):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-def create_new_image_artifact(config, versionString, old_listing_artifact_version):
+def create_new_image_artifact(config, old_listing_artifact_version):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
-    new_version['name'] = versionString
+    new_version['name'] = config.versionString
     new_version['source']['uniqueIdentifier'] = config.imageOcid
     new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
     body = json.dumps(new_version)
@@ -206,13 +209,13 @@ def create_new_image_artifact(config, versionString, old_listing_artifact_versio
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-def associate_artifact_with_package(config, artifactId, newPackageVersionId, versionString):
+def associate_artifact_with_package(config, artifactId, newPackageVersionId):
 
     file_name = "/newArtifact.json" if os.path.isfile("/newArtifact.json") else "newArtifact.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ARTID%%", artifactId)
-    body = body.replace("%%VERS%%", versionString)
+    body = body.replace("%%VERS%%", config.versionString)
 
     if config.imageOcid is not None:
         body = body.replace("Orchestration", "")
@@ -247,18 +250,6 @@ def submit_listing(config):
     else:
         return "this partner has not yet been approved for auto approval. please contact MP admin."
 
-def create_listing(config):
-
-    apicall = f"appstore/publisher/v1/applications"
-    with open("testlisting.payload", "r") as file_in:
-        body = file_in.read()
-    body_json = json.loads(body)
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.post(api_url + apicall, headers=api_headers, json=body_json)
-    print(r.text)
-    r_json = json.loads(r.text)
-    print(json.dumps(r_json, indent=4, sort_keys=False))
-
 def create_new_listing(config):
 
     config.action = "get_applications"
@@ -267,6 +258,7 @@ def create_new_listing(config):
         new_listing_body = yaml.safe_load(stream)
     if 'versionDetails' in new_listing_body:
         vd = new_listing_body['versionDetails']
+        config.versionString = vd['versionNumber']
         if 'releaseDate' in vd:
             new_listing_body['versionDetails']['releaseDate'] = str(new_listing_body['versionDetails']['releaseDate'])
     bind_action_dic(config)
@@ -281,13 +273,13 @@ def create_new_listing(config):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-def create_new_package(config, artifactId, versionString):
+def create_new_package(config, artifactId):
     file_name = "/newPackage.json" if os.path.isfile("/newPackage.json") else "newPackage.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ART_ID%%", artifactId)
-    body = body.replace("%%VER%%", versionString)
-    body = body.replace("%%DESC%%", versionString)
+    body = body.replace("%%VER%%", config.versionString)
+    body = body.replace("%%DESC%%", config.versionString)
 
     config.action = "get_application_packages"
     bind_action_dic(config)
