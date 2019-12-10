@@ -1,0 +1,51 @@
+{
+"name": "TEST DocumentManager",
+"shortDescription":" DocumentManager is a simple solution for keeping all your photos organized.",    
+"longDescription":" You can use DocumentManager to keep all files, including media files, organized. It can search, organize, share, and synch files across devices too.",
+  "pricing":{
+    "description":"Monthly subscription",
+    "type":"PAID"
+  },
+  "products":[
+    {
+      "code":"compute",
+      "categories":[
+        {
+          "code":"VIRTUAL_MACHINES"
+        }
+      ]
+    }
+  ],
+    "support":{
+    "contacts":[
+      {
+        "email":"support@TEST.com",
+        "name":"DocumentManager Support",
+        "subject":"Document Manager Application"
+     }
+    ],
+    "links":[
+      {
+        "name":"Document Manager",
+        "url":"https://support.TEST.com"
+      }
+    ]
+  },
+  "systemRequirements":"Oracle Cloud<br/>Minimum profile: General OC3 | 1 OCPU, 7.5 Gb RAM, 60 GB Local Disk ",
+"deviceType":{
+    "code":"BROWSER"
+  },
+  "languages":[
+    {
+      "code":"en_US"
+    }
+  ],
+  "tagLine":"The most popular documents manager",
+  "tags":"Files, Documents, Cloud",
+  "versionDetails":{
+    "description":"<a target=\"_blank\" href=\"https://DocumentManager.com/changelog.txt\">Change Log</a>",
+    "releaseDate":"2013-06-30T07:00:00.000Z",
+    "versionNumber":"16.2 Document Manager"
+  },
+  "demoURL": "https://www.youtube.com/watch?v=Re4UA6_sD1E"
+}

@@ -1,0 +1,41 @@
+{
+
+	"variables": {
+	},
+	"builders":[
+	{
+		"user_ocid": "user_ocid_placeholder",
+		"tenancy_ocid": "tenancy_ocid_placeholder",
+		"fingerprint": "fingerprint_placeholder",
+		"key_file": "key_file_placeholder",
+		"compartment_ocid": "compartment_ocid_placeholder",
+    	"availability_domain": "IYfK:US-ASHBURN-AD-1",
+    	"base_image_ocid": "ocid1.image.oc1.iad.aaaaaaaavxqdkuyamlnrdo3q7qa7q3tsd6vnyrxjy3nmdbpv7fs7um53zh5q",
+    	"image_name": "image_name_placeholder",
+    	"shape": "VM.Standard2.1",
+    	"ssh_username": "opc",
+		"region": "us-ashburn-1",
+		"subnet_ocid": "ocid1.subnet.oc1.iad.aaaaaaaadyszurgvm3sg4ap5zskhtymtnzpkmzlqmp44wao6vjxzjvfexoeq",
+    		"type": "oracle-oci"	
+	}
+	],
+	"provisioners": [
+		{
+	"type": "shell",
+	"inline": [
+        "#!/usr/bin/env bash",
+	    "sudo /usr/libexec/oci-image-cleanup -f"
+	]
+		
+		}
+	],
+	"post-processors": [
+		[
+		  {
+			"output": "manifest.json",
+			"strip_path": true,
+			"type": "manifest"
+		  }
+		]
+	  ]
+}
