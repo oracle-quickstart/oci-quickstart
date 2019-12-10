@@ -57,7 +57,7 @@ class ListingMetadata:
     def write_metadata(self, file_name):
 
         if file_name is None:
-            file_name = f"{args.partner}_metadata_{args.listingVersionId}.yaml"
+            file_name = f"metadata_{args.listingVersionId}.yaml"
 
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
@@ -136,7 +136,7 @@ class ListingVersion:
         config.action = "get_listingVersion"
         config.listingVersionId = self.listingVersion["listingVersionId"]
         self.listingVersionDetails = do_get_action(config)
-        self.listingMetadata = ListingMetadata(args.metadataFile, self)
+        self.listingMetadata = ListingMetadata(f"metadata_{config.listingVersionId}.yaml", self)
         config.action = "get_application_packages"
         packages = do_get_action(config)
 
@@ -343,8 +343,7 @@ if __name__  == "__main__":
                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
                         help='(optional) the path to the creds file')
-    parser.add_argument('-metadataFile',
-                        help='(optional) the path to the metadata file')
+
 
     args = parser.parse_args()
 
@@ -376,14 +375,10 @@ if __name__  == "__main__":
         partner = Partner()
         print(partner)
 
-        if args.listingVersionId is not None:
-            with open(args.partner + "_" + str(args.listingVersionId) + "_newListings.yaml", 'w+') as stream:
-                yaml.safe_dump(partner.listings[0].listingVersions[0].listingVersion, stream)
-
     if "update_listing" in args.action:
         print(do_update_listing())
 
     if "dump_metadata" in args.action:
         partner = Partner()
         lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
-        lmd.write_metadata(args.metadataFile)
+        lmd.write_metadata(f"metadata_{config.listingVersionId}.yaml")
