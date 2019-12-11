@@ -238,7 +238,7 @@ def submit_listing(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"action": "submit", "note": "submitting new version"}'
+    body = '{"action": "submit", "note": "submitting new version", "autoApprove": "false"}'
     api_headers['Content-Type'] = 'application/json'
     r = requests.patch(uri, headers=api_headers, data=body)
     del api_headers['Content-Type']
