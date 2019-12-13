@@ -46,6 +46,7 @@ def bind_action_dic(config):
         "create_listing": f"appstore/publisher/v1/applications",
         "create_new_version": f"appstore/publisher/v1/applications/{config.listingVersionId}/version",
         "new_package_version": f"appstore/publisher/v2/applications/{config.listingVersionId}/packages/{config.packageVersionId}/version",
+        "upload_icon": f"appstore/publisher/v1/applications/{config.listingVersionId}/icon",
     }
 
 def set_access_token(partnerName, credsFile):
@@ -291,4 +292,17 @@ def create_new_package(config, artifactId):
         print(r.text)
     r_json = json.loads(r.text)
     return r_json["message"]
+
+def upload_icon(config):
+    config.action = "upload_icon"
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png"
+    files = {'image': open(file_name, 'rb')}
+    r = requests.post(uri, headers=api_headers, files=files)
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    return r_json["entityId"]
 
