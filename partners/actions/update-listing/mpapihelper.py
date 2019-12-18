@@ -115,6 +115,9 @@ def update_version_metadata(config, newVersionId):
     body_end = '}'
     body = ""
 
+    if not os.path.isfile(config.metadataFile):
+        config.versionString = "No Version"
+        return f"metadata file {config.metadataFile} not found. skipping metadata update."
     with open(config.metadataFile,  "r") as stream:
         metadata = yaml.safe_load(stream)
 
@@ -197,11 +200,19 @@ def create_new_image_artifact(config, old_listing_artifact_version):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
-    new_version['name'] = config.versionString
-    new_version['source']['uniqueIdentifier'] = config.imageOcid
-    new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
-    body = json.dumps(new_version)
+    if old_listing_artifact_version is not None:
+        new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
+        new_version['name'] = config.versionString
+        new_version['source']['uniqueIdentifier'] = config.imageOcid
+        new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
+        body = json.dumps(new_version)
+    else:
+        file_name = "/newImage.json" if os.path.isfile("/newImage.json") else "newImage.json"
+        with open(file_name, "r") as file_in:
+            body = file_in.read()
+        body = body.replace("%%NAME%%", config.versionString)
+        body = body.replace("%%OCID%%", config.imageOcid)
+
     api_headers['Content-Type'] = 'application/json'
     r = requests.post(uri, headers=api_headers, data=body)
     del api_headers['Content-Type']
