@@ -2,10 +2,10 @@
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
-export LISTING_ID=$(cat ${GITHUB_WORKSPACE}/ListingId)
+export LISTING_ID=$(cat ${GITHUB_WORKSPACE}/ListingId 2> /dev/null)
 export ZIP_FILE=$(ls ${GITHUB_WORKSPACE}/upload)
 export ZIP_PATH=${GITHUB_WORKSPACE}/upload
-export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt)
+export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
 
 if [ -z "$LISTING_ID" ]
 then
