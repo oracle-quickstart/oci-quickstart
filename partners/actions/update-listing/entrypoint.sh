@@ -9,7 +9,7 @@ export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt)
 
 if [ -z "$LISTING_ID" ]
 then
-    if [-z "$OCID" ]
+    if [ -z "$OCID" ]
     then
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -fileName $ZIP_PATH/$ZIP_FILE"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -fileName $ZIP_PATH/$ZIP_FILE
@@ -18,7 +18,7 @@ then
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -imageOcid $OCID
     fi
 else
-    if [-z "$OCID" ]
+    if [ -z "$OCID" ]
     then
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -listingVersionId $LISTING_ID -fileName $ZIP_PATH/$ZIP_FILE"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -listingVersionId $LISTING_ID -fileName $ZIP_PATH/$ZIP_FILE
