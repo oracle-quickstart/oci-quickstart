@@ -37,7 +37,7 @@ then
   echo -e "${CYAN}INFO: in test mode.${NC}"
 fi
 
-echo -e "${CYAN}INFO: will create compartment and policy with name clitest${rand}${NC}"
+echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $policy_name${NC}"
 
 policy='[
   "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
