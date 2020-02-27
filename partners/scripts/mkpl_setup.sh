@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # To test run: export TESTING="true"
+# To clear: unset TESTING
 
 # Colors
 RED='\033[0;31m'
@@ -17,8 +18,10 @@ tenancy_id=$(oci iam availability-domain list | jq -r ' .data[0]."compartment-id
 
 if [ -z "$tenancy_id" ]
 then
-      echo "Error: Unable to discover tenancy ocid, exiting"
-      exit 1
+  echo "Error: Unable to discover tenancy ocid, exiting"
+  exit 1
+else
+  echo -e "${GREEN}SUCCESS: teancy ocid discovered: $tenancy_id${NC}"
 fi
 
 
@@ -46,11 +49,12 @@ echo $policy > tmp_mkpl_policy.json
 
 # Create compartment under root compartment
 echo -e "${CYAN}INFO: Creating compartment...${NC}"
-oci iam compartment create \
+comp_json="$(oci iam compartment create \
   --compartment-id $tenancy_id \
   --description "To contain custom images read by the marketplace service" \
-  --name $comp_name
+  --name $comp_name)"
 comp_return=$?
+echo $comp_json | jq .
 
 if [[ $comp_return -eq 0 ]]
 then
@@ -61,12 +65,13 @@ fi
 
 # Create policy under root compartment
 echo -e "${CYAN}INFO: Creating policy...${NC}"
-oci iam policy create \
+policy_json=$(oci iam policy create \
   --compartment-id $tenancy_id \
   --description "Allow marketplace service to read images" \
   --name $policy_name \
-  --statements file://./tmp_mkpl_policy.json
+  --statements file://./tmp_mkpl_policy.json)
 policy_return=$?
+echo $policy_json | jq .
 
 if [[ $policy_return -eq 0 ]]
 then
@@ -75,7 +80,7 @@ else
   echo -e "${RED}ERROR: policy not created.${NC}"
 fi
 
-echo -e "${CYAN}INFO: cleaning tmp file...${NC}"
+echo -e "${CYAN}INFO: cleaning policy tmp file...${NC}"
 rm -f tmp_mkpl_policy.json
 
 echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
@@ -84,4 +89,10 @@ echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
 if [ -n "$TESTING" ]
 then
   echo -e "${CYAN}INFO: deleting testing resources...${NC}"
+  id=$(echo $comp_json | jq -r '.data.id')
+  echo -e "${CYAN}INFO: deleting $id ...${NC}"
+  oci iam compartment delete --compartment-id $id
+  id=$(echo $policy_json | jq -r '.data.id')
+  echo -e "${CYAN}INFO: deleting $id ...${NC}"
+  oci iam policy delete --policy-id $id
 fi
