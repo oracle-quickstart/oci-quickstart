@@ -52,6 +52,12 @@ oci iam compartment create \
   --name $comp_name
 comp_return=$?
 
+if [[ $comp_return -eq 0 ]]
+then
+  echo -e "${GREEN}SUCCESS: compatment $comp_name created.${NC}"
+else
+  echo -e "${RED}ERROR: compartment not created.${NC}"
+fi
 
 # Create policy under root compartment
 echo -e "${CYAN}INFO: Creating policy...${NC}"
@@ -62,8 +68,17 @@ oci iam policy create \
   --statements file://./tmp_mkpl_policy.json
 policy_return=$?
 
+if [[ $policy_return -eq 0 ]]
+then
+  echo -e "${GREEN}SUCCESS: policy $policy_name created.${NC}"
+else
+  echo -e "${RED}ERROR: policy not created.${NC}"
+fi
+
 echo -e "${CYAN}INFO: cleaning tmp file...${NC}"
 rm -f tmp_mkpl_policy.json
+
+echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
 
 # testing override
 if [ -n "$TESTING" ]
