@@ -56,7 +56,7 @@ comp_json="$(oci iam compartment create \
   --description "To contain custom images read by the marketplace service" \
   --name $comp_name)"
 comp_return=$?
-echo $comp_json | jq .
+echo $comp_json | jq -M .
 
 if [[ $comp_return -eq 0 ]]
 then
@@ -73,7 +73,7 @@ policy_json=$(oci iam policy create \
   --name $policy_name \
   --statements file://./tmp_mkpl_policy.json)
 policy_return=$?
-echo $policy_json | jq .
+echo $policy_json | jq -M .
 
 if [[ $policy_return -eq 0 ]]
 then
