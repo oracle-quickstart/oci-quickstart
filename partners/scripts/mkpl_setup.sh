@@ -93,8 +93,8 @@ then
   echo -e "${CYAN}INFO: deleting testing resources...${NC}"
   id=$(echo $comp_json | jq -r '.data.id')
   echo -e "${CYAN}INFO: deleting $id ...${NC}"
-  oci iam compartment delete --compartment-id $id
+  oci iam compartment delete --force --compartment-id $id
   id=$(echo $policy_json | jq -r '.data.id')
   echo -e "${CYAN}INFO: deleting $id ...${NC}"
-  oci iam policy delete --policy-id $id
+  oci iam policy delete --force --policy-id $id
 fi
