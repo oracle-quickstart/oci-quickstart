@@ -7,7 +7,7 @@ apt install -y build-essential unzip go-dep
 wget -q https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
 unzip terraform_0.12.10_linux_amd64.zip -d /usr/bin
 cd ${GITHUB_WORKSPACE}/terraform
-terraform init && terraform 0.12upgrade -yes
+terraform init
 
 #Set up environment for running terratest in go
 mkdir -p $HOME/go/src/terratest/test
