@@ -293,13 +293,6 @@ def do_update_listing():
     if config.imageOcid is not None:
         old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
 
-    if config.imageOcid is None:
-        # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.fileName)
-    else:
-        # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, old_listing_artifact_version)
-
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
@@ -315,6 +308,14 @@ def do_update_listing():
 
     # update versioned package details
     message = update_versioned_package_version(config, newPackageVersionId)
+    
+    if config.imageOcid is None:
+        # create new artifact for stack listing
+        artifactId = create_new_stack_artifact(config, args.fileName)
+    else:
+        # create new artifact for iamge listing
+        artifactId = create_new_image_artifact(config, old_listing_artifact_version)
+
 
     # update versioned package details - associate newly created artifact
     message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
