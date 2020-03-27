@@ -343,10 +343,9 @@ def lookup_listingVersionId_from_listingId(listingId):
     listingVersions = do_get_action(config)
     for item in listingVersions['items']:
         if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
-            break
-        else:
-            return '0'
-    return item['GenericListing']['listingVersionId']
+            return item['GenericListing']['listingVersionId']
+    return '0'
+
 
 
 
