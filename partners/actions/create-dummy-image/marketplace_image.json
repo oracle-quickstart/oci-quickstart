@@ -15,7 +15,7 @@
     	"shape": "VM.Standard2.1",
     	"ssh_username": "opc",
 		"region": "us-ashburn-1",
-		"subnet_ocid": "ocid1.subnet.oc1.iad.aaaaaaaadyszurgvm3sg4ap5zskhtymtnzpkmzlqmp44wao6vjxzjvfexoeq",
+		"subnet_ocid": "ocid1.subnet.oc1.iad.aaaaaaaavycjgiklg2gtmvdxb5post7kxtkwqso3ou5ia225ziq7iskarr3q",
     		"type": "oracle-oci"	
 	}
 	],
