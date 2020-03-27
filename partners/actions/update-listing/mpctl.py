@@ -1,3 +1,4 @@
+import sys
 import argparse
 import json
 import os.path
@@ -7,25 +8,32 @@ from mpapihelper import *
 #
 # usage:
 #
+#   update listing with new terraform template
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -fileName <fileName of ORM zip>
+#
+#   update listing with new image
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -imageOcid <imageOcid>
+#
+#   create new terraform listing
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -fileName <fileName of ORM zip>
+#
+#   create new image listing
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
+#
 #   get one listing
-#       python3 mpctl.py -partner <partner> -action get_listingVersion -listingVersionId <listingVersionId>
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
 #
 #   get all listings
-#       python3 mpctl.py -partner <partner> -action get_listingVersions
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
 #
 #   build one listing tree
-#       python3 mpctl.py -partner <partner> -action build_listings -listingVersionId <listingVersionId>
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
 #
-#   build all listings trees for partner
-#       python3 mpctl.py -partner <partner> -action build_listings [-includeUnpublished]
+#   build all listings tree for partner
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
 #
-#   update listing with new terraform template
-#       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
-#           -fileName <fileName>
-#   update listing with new image
-#       python3 mpctl.py -partner <partner> -action update_listing -listingVersionId <listingVersionId>
-#           -imageOcid <imageOcid>
-#
+#   dump metadata file for a listing
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
 #######################################################################################################################
 
 config = None
@@ -46,6 +54,11 @@ class ListingMetadata:
 
         if lv is not None:
             lvd = lv.listingVersionDetails
+            self.api_metadata['versionDetails'] = {}
+            self.api_metadata['versionDetails']['versionNumber'] = lvd['versionDetails']['versionNumber'] \
+                if 'versionDetails' in lvd and 'versionNumber' in lvd['versionDetails'] else ''
+            self.api_metadata['versionDetails']['releaseDate'] = lvd['versionDetails']['releaseDate'] \
+                if 'versionDetails' in lvd and 'releaseDate' in lvd['versionDetails'] else ''
             self.api_metadata['name'] = lvd['name'] if 'name' in lvd else ''
             self.api_metadata['shortDescription'] = lvd['shortDescription'] if 'shortDescription' in lvd else ''
             self.api_metadata['longDescription'] = lvd['longDescription'] if 'longDescription' in lvd else ''
@@ -53,12 +66,11 @@ class ListingMetadata:
             self.api_metadata['tags'] = lvd['tags'] if 'tags' in lvd else ''
             self.api_metadata['tagLine'] = lvd['tagLine'] if 'tagLine' in lvd else ''
             self.api_metadata['systemRequirements'] = lvd['systemRequirements'] if 'systemRequirements' in lvd else ''
-            self.api_metadata['version'] = f"SET ME IN metadata_{args.listingVersionId}.yaml"
 
     def write_metadata(self, file_name):
 
         if file_name is None:
-            file_name = f"metadata_{args.listingVersionId}.yaml"
+            file_name = f"metadata.yaml"
 
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
@@ -324,10 +336,54 @@ def do_update_listing():
 
     return message
 
+
+def lookup_listingVersionId_from_listingId(listingId):
+    config.action = "get_listingVersions"
+    listingVersions = do_get_action(config)
+    for item in listingVersions['items']:
+        if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
+            break
+        else:
+            return '0'
+    return item['GenericListing']['listingVersionId']
+
+
+
 if __name__  == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-partner',
-                        help='the name of the partner to use')
+
+    usage_text = '''usage:
+    update listing with new terraform template
+       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -fileName <fileName of ORM zip>
+
+   update listing with new image
+       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -imageOcid <imageOcid>
+
+   create new terraform listing
+       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -fileName <fileName of ORM zip>
+
+   create new image listing
+       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
+
+   get one listing
+       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
+
+   get all listings
+       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
+
+   build one listing tree
+       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
+
+   build all listings tree for partner
+       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
+       
+   dump metadata file for a listing
+       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
+   '''
+
+    parser = argparse.ArgumentParser(prog='mpctl',
+                                     description='publisher api tool',
+                                     epilog=usage_text,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-action',
                         help='the action to perform')
     parser.add_argument('-includeUnpublished', action='store_true',
@@ -347,12 +403,15 @@ if __name__  == "__main__":
     parser.add_argument('-imageOcid',
                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
-                        help='(optional) the path to the creds file')
+                        help='the path to the creds file')
 
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     args = parser.parse_args()
 
-    config = Config(args.partner, args.credsFile)
+    config = Config(args.credsFile)
     if args.artifactId is not None:
         config.artifactId = args.artifactId
     if args.action is not None:
@@ -367,7 +426,16 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-
+    if not os.path.isfile("metadata.yaml"):
+        config.versionString = "No Version"
+        if args.listingVersionId is None:
+            config.listingVersionId = 0
+    else:
+        with open("metadata.yaml", "r") as stream:
+            metadata = yaml.safe_load(stream)
+            config.versionString = metadata['versionDetails']['versionNumber']
+            if args.listingVersionId is None:
+                config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
 
     if "get" in args.action:
         r_json = do_get_action(config)
@@ -386,4 +454,4 @@ if __name__  == "__main__":
     if "dump_metadata" in args.action:
         partner = Partner()
         lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
-        lmd.write_metadata(f"metadata_{config.listingVersionId}.yaml")
+        lmd.write_metadata(f"metadata.yaml")

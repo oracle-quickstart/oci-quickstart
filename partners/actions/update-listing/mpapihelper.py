@@ -25,9 +25,9 @@ class Config:
     metadataFile = None
     versionString = None
 
-    def __init__(self, partnerName, credsFile):
+    def __init__(self, credsFile):
         if self.access_token is None:
-            set_access_token(partnerName, credsFile)
+            set_access_token(credsFile)
 
 def bind_action_dic(config):
     global action_api_uri_dic
@@ -49,17 +49,13 @@ def bind_action_dic(config):
         "upload_icon": f"appstore/publisher/v1/applications/{config.listingVersionId}/icon",
     }
 
-def set_access_token(partnerName, credsFile):
+def set_access_token(credsFile):
     global access_token
     global creds
     global api_headers
 
-    if partnerName is not None and os.path.isfile(partnerName + "_creds.yaml"):
-        with open(partnerName + "_creds.yaml", 'r') as stream:
-            creds = yaml.safe_load(stream)
-    else:
-        with open(credsFile, 'r') as stream:
-            creds = yaml.safe_load(stream)
+    with open(credsFile, 'r') as stream:
+        creds = yaml.safe_load(stream)
 
     auth_string = creds['client_id']
     auth_string += ':'
@@ -115,18 +111,17 @@ def update_version_metadata(config, newVersionId):
     body_end = '}'
     body = ""
 
-    if not os.path.isfile(config.metadataFile):
-        config.versionString = "No Version"
-        return f"metadata file {config.metadataFile} not found. skipping metadata update."
-    with open(config.metadataFile,  "r") as stream:
+    if not os.path.isfile("metadata.yaml"):
+        return f"metadata file metadata.yaml not found. skipping metadata update."
+    with open("metadata.yaml",  "r") as stream:
         metadata = yaml.safe_load(stream)
 
-    config.versionString = metadata['version']
-    del metadata['version']
+    updateable_items = ['longDescription','name','shortDescription','systemRequirements','tagLine','tags','usageInformation']
 
     for k, v in metadata.items():
-        v = v.replace('"',"'")
-        body += f""""{k}": "{v}","""
+        if k in updateable_items:
+            v = v.replace('"',"'")
+            body += f""""{k}": "{v}","""
 
     body = body_start + body
     body = body[:len(body) - 1]
@@ -171,7 +166,11 @@ def update_versioned_package_version(config, newPackageVersionId):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"version": "' + config.versionString + '", "description": "Description of package", "serviceType": "OCIOrchestration"}'
+    if config.imageOcid is None:
+        service_type = "OCIOrchestration"
+    else:
+        service_type = "OCI"
+    body = '{"version": "' + config.versionString + '", "description": "' + config.versionString + '", "serviceType": "' + service_type + '"}'
     payload = {'json': (None, body)}
     r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
@@ -265,9 +264,10 @@ def submit_listing(config):
 def create_new_listing(config):
 
     config.action = "get_applications"
-    file_name = "/newListing.yaml" if os.path.isfile("/newListing.yaml") else "newListing.yaml"
+    file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
     with open(file_name, 'r') as stream:
         new_listing_body = yaml.safe_load(stream)
+        del new_listing_body['listingId']
     if 'versionDetails' in new_listing_body:
         vd = new_listing_body['versionDetails']
         config.versionString = vd['versionNumber']
