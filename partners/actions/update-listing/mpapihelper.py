@@ -249,7 +249,7 @@ def submit_listing(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"action": "submit", "note": "submitting new version", "autoApprove": "false"}'
+    body = '{"action": "submit", "note": "submitting new version", "autoApprove": "true"}'
     api_headers['Content-Type'] = 'application/json'
     r = requests.patch(uri, headers=api_headers, data=body)
     del api_headers['Content-Type']
@@ -260,6 +260,23 @@ def submit_listing(config):
         return r_json["message"]
     else:
         return "this partner has not yet been approved for auto approval. please contact MP admin."
+
+def publish_listing(config):
+    config.action = "get_listingVersion"
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    body = '{"action": "publish"}'
+    api_headers['Content-Type'] = 'application/json'
+    r = requests.patch(uri, headers=api_headers, data=body)
+    del api_headers['Content-Type']
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    if "message" in r_json:
+        return r_json["message"]
+    else:
+        return "Failed to auto-publish, please contact MP admin to maunaully approve listing."
 
 def create_new_listing(config):
 
