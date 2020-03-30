@@ -7,7 +7,6 @@ export ZIP_FILE=$(ls ${GITHUB_WORKSPACE}/upload 2> /dev/null)
 export ZIP_PATH=${GITHUB_WORKSPACE}/upload
 export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
 
-echo "The listing id is: $LISTING_ID"
 
 if [ -z "$LISTING_ID" ] || [ "$LISTING_ID" = "0" ]
 then
