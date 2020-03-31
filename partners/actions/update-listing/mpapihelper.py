@@ -245,21 +245,27 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId):
     return r_json["message"]
 
 def submit_listing(config):
-    config.action = "get_listingVersion"
-    bind_action_dic(config)
-    apicall = action_api_uri_dic[config.action]
-    uri = api_url + apicall
-    body = '{"action": "submit", "note": "submitting new version", "autoApprove": "true"}'
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.patch(uri, headers=api_headers, data=body)
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    if "message" in r_json:
-        return r_json["message"]
-    else:
-        return "this partner has not yet been approved for auto approval. please contact MP admin."
+    autoApprove = "true"
+    while (True):
+        config.action = "get_listingVersion"
+        bind_action_dic(config)
+        apicall = action_api_uri_dic[config.action]
+        uri = api_url + apicall
+        body = '{"action": "submit", "note": "submitting new version", "autoApprove": "'+ autoApprove +'"}'
+        api_headers['Content-Type'] = 'application/json'
+        r = requests.patch(uri, headers=api_headers, data=body)
+        del api_headers['Content-Type']
+        if r.status_code > 299:
+            print(r.text)
+        r_json = json.loads(r.text)
+        if "message" in r_json:
+            return r_json["message"]
+        if autoApprove == "false":
+            return "this partner has not yet been approved for auto approval. please contact MP admin."
+        else:
+            autoApprove = "false"
+
+
 
 def publish_listing(config):
     config.action = "get_listingVersion"
