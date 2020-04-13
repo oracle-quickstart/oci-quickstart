@@ -3,5 +3,5 @@ FROM golang:1.13
 LABEL "name"="Build ORM Zip"
 LABEL "version"="1.0"
 
-COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
