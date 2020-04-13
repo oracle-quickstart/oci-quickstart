@@ -1,6 +1,4 @@
 # Marketplace Stack Schema
-
-## Introduction
 Oracle Cloud Infrastructure Marketplace is an online store that offers applications specifically for customers of Oracle Cloud Infrastructure. In the Oracle Cloud Infrastructure Marketplace catalog, customers can find and launch Images and Stacks from Oracle or trusted partners. These Marketplace Images or Stacks are deployed into the customer's tenancy.
 
 Marketplace Images are templates of virtual hard drives that determine the operating system and software to run on an instance. Publishers will publish a [Custom Image](https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/managingcustomimages.htm) as an Artifact in the [Marketplace Partner Portal](https://partner.cloudmarketplace.oracle.com/partner/index.html).
@@ -159,7 +157,7 @@ variables:
     description: Enter your username
     default: admin
     required: true
- 
+
 myVcn:
     type: oci:core:vcn:id
     dependsOn:
@@ -173,18 +171,18 @@ myVcn:
             - true
           - not:
             - false
- 
+
   subnetCompartment:
     type: oci:identity:compartment:id
     visible: ${useExistingVcn}
- 
+
   mySubnet:
     type: oci:core:subnet:id
     dependsOn:
       compartmentId: ${subnetCompartment}
       vcnId: ${myVcn}
     visible: ${useExistingVcn}
- 
+
   mySubnetWithFilter:
     type: oci:core:subnet:id
     dependsOn:
@@ -220,33 +218,33 @@ outputs:
     title: Control Center
     displayText: Control Center
     visible: false
- 
- 
+
+
   schemaRegistryUrl:
     type: link
     title: Schema Registry
     displayText: Schema Registry
- 
+
   schemaRegistryPublicIps:
     type: csv
     title: Public IPs
- 
+
   schameRegistryLoadBalancer:
     type: ocid
     title: Load Balancer
-   
+
   brokerPublicIps:
     type: csv
-     
+
   connectUrl:
     type: link
     title: Connect
     displayText: Connect
- 
+
   connectPublicIps:
     type: csv
     title: Public IPs
-   
+
   restUrl:
     type: link
     title: Rest API
@@ -291,8 +289,8 @@ outputGroups:
       - ${schemaRegistryPublicIps}
       - ${schemaRegistryInstances}
       - ${schemaRegistryLoadBalancer}
- 
- 
+
+
   - title: Broker / Connect
     outputs:
       - ${brokerPublicIps}
