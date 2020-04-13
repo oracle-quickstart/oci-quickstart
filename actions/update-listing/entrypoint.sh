@@ -7,7 +7,6 @@ export ZIP_FILE=$(ls ${GITHUB_WORKSPACE}/upload 2> /dev/null)
 export ZIP_PATH=${GITHUB_WORKSPACE}/upload
 export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
 
-
 if [ -z "$LISTING_ID" ] || [ "$LISTING_ID" = "0" ]
 then
     if [ -z "$OCID" ]
@@ -26,5 +25,5 @@ else
     else
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID
-    fi    
+    fi
 fi
