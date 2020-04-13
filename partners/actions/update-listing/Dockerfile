@@ -1,6 +1,6 @@
 FROM rackspacedot/python37:latest
 
-LABEL "name"="update marketplace listing"
+LABEL "name"="update listing"
 LABEL "version"="1.0"
 
 COPY entrypoint.sh /entrypoint.sh
