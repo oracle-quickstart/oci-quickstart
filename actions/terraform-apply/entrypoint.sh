@@ -31,6 +31,4 @@ echo "${TF_VAR_private_key}" > ${GITHUB_WORKSPACE}/oci.pem
 export TF_VAR_private_key_path=${GITHUB_WORKSPACE}/oci.pem
 export TF_ACTION_WORKING_DIR=${GITHUB_WORKSPACE}
 
-ls $HOME/go/src/terratest/test/test-apply.go
-
 go test -v $HOME/go/src/terratest/test/test-apply.go -timeout 20m
