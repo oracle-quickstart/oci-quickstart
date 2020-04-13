@@ -1,20 +1,20 @@
 {
-"resources":[
+  "resources": [
     {
-       "serviceType":"OCIOrchestration",
-       "type":"terraform",
-       "properties":[
-          {
-             "name":"artifact",
-             "value":"%%ARTID%%",
-             "valueProperties":[
-                {
-                  "name":"name",
-                  "value":"%%VERS%%"
-                }
-             ]
-          }
-       ]
+      "serviceType": "OCIOrchestration",
+      "type": "terraform",
+      "properties": [
+        {
+          "name": "artifact",
+          "value": "%%ARTID%%",
+          "valueProperties": [
+            {
+              "name": "name",
+              "value": "%%VERS%%"
+            }
+          ]
+        }
+      ]
     }
- ]
+  ]
 }

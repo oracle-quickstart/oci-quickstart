@@ -38,6 +38,7 @@ from mpapihelper import *
 
 config = None
 
+
 class ListingMetadata:
 
     git_metadata = {}
@@ -75,6 +76,7 @@ class ListingMetadata:
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
 
+
 class ArtifactVersion:
     details = []
 
@@ -86,6 +88,7 @@ class ArtifactVersion:
         ppstring += "\n"
         ppstring += json.dumps(self.details, indent=4, sort_keys=False)
         return ppstring
+
 
 class Artifact:
     versions = []
@@ -111,6 +114,7 @@ class Artifact:
             ppstring += str(version)
         return ppstring
 
+
 class Package:
     package = []
     artifacts = []
@@ -131,6 +135,7 @@ class Package:
             ppstring += str(artifact)
         return ppstring
 
+
 class ListingVersion:
     packageVersions = []
     listingVersion = ''
@@ -149,7 +154,8 @@ class ListingVersion:
         config.action = "get_listingVersion"
         config.listingVersionId = self.listingVersion["listingVersionId"]
         self.listingVersionDetails = do_get_action(config)
-        self.listingMetadata = ListingMetadata(f"metadata_{config.listingVersionId}.yaml", self)
+        self.listingMetadata = ListingMetadata(
+            f"metadata_{config.listingVersionId}.yaml", self)
         config.action = "get_application_packages"
         packages = do_get_action(config)
 
@@ -164,13 +170,15 @@ class ListingVersion:
         ppstring += "\n"
         ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
         ppstring += "\n"
-        ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listingVersionDetails,
+                               indent=4, sort_keys=False)
         ppstring += "\n"
         ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
         for package in self.packages:
             ppstring += str(package)
             pass
         return ppstring
+
 
 class Listing:
     listingVersions = []
@@ -187,6 +195,7 @@ class Listing:
             ppstring += str(listingVersion)
         return ppstring
 
+
 class TermVersion():
     termVersion = []
 
@@ -200,6 +209,7 @@ class TermVersion():
 
     def __str__(self):
         return json.dumps(self.termVersion, indent=4, sort_keys=False)
+
 
 class Terms():
     terms = []
@@ -220,6 +230,7 @@ class Terms():
             ppstring += str(termVersion)
         return ppstring
 
+
 class Partner:
 
     listings = []
@@ -235,12 +246,13 @@ class Partner:
 
         if "items" in listingVersions:
             for item in listingVersions["items"]:
-                if not args.includeUnpublished and item["GenericListing"]["status"]["code"] == "UNPUBLISHED" :
+                if not args.includeUnpublished and item["GenericListing"]["status"]["code"] == "UNPUBLISHED":
                     continue
                 found = False
                 for listing in self.listings:
                     if listing.listingId == item["GenericListing"]["listingId"]:
-                        listing.listingVersions.append(ListingVersion(item["GenericListing"]))
+                        listing.listingVersions.append(
+                            ListingVersion(item["GenericListing"]))
                         found = True
                         break
 
@@ -274,6 +286,7 @@ class Partner:
             ppstring += str(terms)
         return ppstring
 
+
 def do_create():
     global config
     file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png"
@@ -291,7 +304,6 @@ def do_create():
         # create new artifact for iamge listing
         artifactId = create_new_image_artifact(config, None)
 
-
     newPackageId = create_new_package(config, artifactId)
 
     # submit the new version of the listing for approval
@@ -302,12 +314,14 @@ def do_create():
 
     return message
 
+
 def do_update_listing():
     global config
     partner = Partner()
 
     if config.imageOcid is not None:
-        old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
+        old_listing_artifact_version = partner.listings[0].listingVersions[
+            0].packages[0].artifacts[0].versions[0].details
 
     # TODO: surround this if else with retry loop while status is "in validation"
 
@@ -316,9 +330,8 @@ def do_update_listing():
         artifactId = create_new_stack_artifact(config, args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, old_listing_artifact_version)
-
-
+        artifactId = create_new_image_artifact(
+            config, old_listing_artifact_version)
 
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
@@ -331,14 +344,15 @@ def do_update_listing():
     packageId = get_packageId(config, newVersionId)
 
     # create a package version from existing package
-    newPackageVersionId = get_new_packageVersionId(config, newVersionId, packageId)
+    newPackageVersionId = get_new_packageVersionId(
+        config, newVersionId, packageId)
 
     # update versioned package details
     message = update_versioned_package_version(config, newPackageVersionId)
-    
 
     # update versioned package details - associate newly created artifact
-    message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
+    message = associate_artifact_with_package(
+        config, artifactId, newPackageVersionId)
 
     # submit the new version of the listing for approval
     message = submit_listing(config)
@@ -358,9 +372,7 @@ def lookup_listingVersionId_from_listingId(listingId):
     return '0'
 
 
-
-
-if __name__  == "__main__":
+if __name__ == "__main__":
 
     usage_text = '''usage:
     update listing with new terraform template
@@ -386,7 +398,7 @@ if __name__  == "__main__":
 
    build all listings tree for partner
        python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
-       
+
    dump metadata file for a listing
        python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
    '''
@@ -412,7 +424,7 @@ if __name__  == "__main__":
     parser.add_argument('-fileName',
                         help='the name of the TF file')
     parser.add_argument('-imageOcid',
-                       help='the ocid of the update image')
+                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
                         help='the path to the creds file')
 
@@ -446,7 +458,8 @@ if __name__  == "__main__":
             metadata = yaml.safe_load(stream)
             config.versionString = metadata['versionDetails']['versionNumber']
             if args.listingVersionId is None:
-                config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+                config.listingVersionId = lookup_listingVersionId_from_listingId(
+                    metadata['listingId'])
 
     if "get" in args.action:
         r_json = do_get_action(config)

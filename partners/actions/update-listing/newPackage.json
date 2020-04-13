@@ -1,15 +1,17 @@
 {
-  "version":"%%VER%%",
-  "description":"%%DESC%%",
+  "version": "%%VER%%",
+  "description": "%%DESC%%",
   "serviceType": "OCIOrchestration",
-  "resources":
-    [{
+  "resources": [
+    {
       "serviceType": "OCIOrchestration",
       "type": "terraform",
-      "properties":
-        [{
+      "properties": [
+        {
           "name": "artifact",
           "value": "%%ART_ID%%"
-        }]
-	}]
- }
+        }
+      ]
+    }
+  ]
+}

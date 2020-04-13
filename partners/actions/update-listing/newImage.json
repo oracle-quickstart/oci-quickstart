@@ -1,6 +1,18 @@
-{"name": "%%NAME%%",
- "artifactType": "OCI_COMPUTE_IMAGE",
- "source": {"regionCode": "us-ashburn-1", "uniqueIdentifier": "%%OCID%%"},
- "artifactProperties": [{"artifactTypePropertyName": "compartmentOCID",
-                         "value": "ocid1.compartment.oc1..aaaaaaaaxrcshrhpq6exsqibhdzseghk4yjgrwxn3uaev6poaek2ooz4n7eq"},
-                        {"artifactTypePropertyName": "ociTenancyID", "value": "59030347"}]}
+{
+  "name": "%%NAME%%",
+  "artifactType": "OCI_COMPUTE_IMAGE",
+  "source": {
+    "regionCode": "us-ashburn-1",
+    "uniqueIdentifier": "%%OCID%%"
+  },
+  "artifactProperties": [
+    {
+      "artifactTypePropertyName": "compartmentOCID",
+      "value": "ocid1.compartment.oc1..aaaaaaaaxrcshrhpq6exsqibhdzseghk4yjgrwxn3uaev6poaek2ooz4n7eq"
+    },
+    {
+      "artifactTypePropertyName": "ociTenancyID",
+      "value": "59030347"
+    }
+  ]
+}
