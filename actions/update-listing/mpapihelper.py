@@ -352,7 +352,7 @@ def upload_icon(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    file_name = "marketplace/icon.png"
+    file_name = "/marketplace/icon.png" if os.path.isfile("/marketplace/icon.png") else "marketplace/icon.png"
     files = {'image': open(file_name, 'rb')}
     r = requests.post(uri, headers=api_headers, files=files)
     if r.status_code > 299:
