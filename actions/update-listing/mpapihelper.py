@@ -237,7 +237,6 @@ def create_new_image_artifact(config, old_listing_artifact_version):
 
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId):
-
     file_name = "/newArtifact.json" if os.path.isfile(
         "/newArtifact.json") else "newArtifact.json"
     with open(file_name, "r") as file_in:
@@ -303,7 +302,6 @@ def publish_listing(config):
 
 
 def create_new_listing(config):
-
     config.action = "get_applications"
     file_name = "/metadata.yaml" if os.path.isfile(
         "/metadata.yaml") else "metadata.yaml"
