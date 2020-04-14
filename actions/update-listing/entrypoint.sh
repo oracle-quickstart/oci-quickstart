@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pip install requests
-pip install yaml
+pip install pyyaml
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
