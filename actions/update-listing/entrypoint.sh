@@ -1,5 +1,7 @@
 #!/bin/bash
 
+pip install requests
+
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
 export LISTING_ID=$(grep -e listingId ${GITHUB_WORKSPACE}/marketplace/metadata.yaml 2> /dev/null | grep -oe [0-9]*)
