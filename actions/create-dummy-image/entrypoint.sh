@@ -3,9 +3,8 @@ apt-get update
 apt install -y jq unzip
 
 # Installing Packer
-export VER="1.4.4"
-wget -q https://releases.hashicorp.com/packer/${VER}/packer_${VER}_linux_amd64.zip
-unzip packer_${VER}_linux_amd64.zip -d /usr/bin
+wget -q https://releases.hashicorp.com/packer/1.4.4/packer_1.4.4_linux_amd64.zip
+unzip packer_1.4.4_linux_amd64.zip -d /usr/bin
 
 # Set up environment
 echo "${TF_VAR_private_key}" > ${GITHUB_WORKSPACE}/oci.pem

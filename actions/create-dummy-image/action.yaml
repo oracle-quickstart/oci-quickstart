@@ -1,0 +1,15 @@
+name:            'Partner Marketplace-ready Image'
+description:     'From a partner custom image creates a OCI image that is ready to be submitted to Marketplace'
+inputs:
+  base-image:
+    description: 'This is the OCID of the custom image that serves as a baseline.'
+    required:    true
+    default:     'ocid1.image.oc1.iad.aaaaaaaavxqdkuyamlnrdo3q7qa7q3tsd6vnyrxjy3nmdbpv7fs7um53zh5q'
+outputs:
+  image-ocid:
+    description: 'The OCID of the output image'
+runs:
+  using:         'docker'
+  image:         'Dockerfile'
+  args:
+    - ${{ inputs.base-image }}
