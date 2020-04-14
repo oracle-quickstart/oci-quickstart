@@ -12,11 +12,12 @@ NC='\033[0m'
 
 # Get tenancy id via CLI
 tenancy_id=$(oci iam availability-domain list | jq -r ' .data[0]."compartment-id"')
+
 # Alternatives that work now, but may not in the future
 # tenancy_id=$(grep tenancy $OCI_CLI_CONFIG_FILE | head -n 1 | cut -d'=' -f2)
 # oci iam compartment list | jq -cr '[.data[] | select(."compartment-id" | contains("tenancy"))] | .[0]."compartment-id"'
-# Alternative without jq is tenancy_id=$(oci iam availability-domain list --query 'data[0]."compartment-id"' --raw-output)
 
+# Alternative without jq is tenancy_id=$(oci iam availability-domain list --query 'data[0]."compartment-id"' --raw-output)
 if [ -z "$tenancy_id" ]
 then
   echo "Error: Unable to discover tenancy ocid, exiting"
