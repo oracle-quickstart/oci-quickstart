@@ -4,12 +4,12 @@ apt-get update
 apt install -y build-essential unzip go-dep
 
 # Install Terraform
-wget -q https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
-unzip terraform_0.12.10_linux_amd64.zip -d /usr/bin
+wget -q https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
+unzip terraform_0.12.24_linux_amd64.zip -d /usr/bin
 cd ${GITHUB_WORKSPACE}
 terraform init
 
-# Environment Setup
+# Go Setup
 mkdir -p $HOME/go/src/terratest/test
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
