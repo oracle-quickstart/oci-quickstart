@@ -1,4 +1,4 @@
-FROM rackspacedot/python37:latest
+FROM python:3.9
 
 LABEL "name"="Update Listing"
 LABEL "version"="1.0"
