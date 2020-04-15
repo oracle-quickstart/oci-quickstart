@@ -4,5 +4,5 @@ LABEL "name"="Update Listing"
 LABEL "version"="1.0"
 
 COPY entrypoint.sh /
-COPY update-listing.py /
+COPY mpctl.py /
 ENTRYPOINT ["/entrypoint.sh"]
