@@ -15,97 +15,20 @@ api_headers = ''
 config = None
 
 def main():
-    usage_text = '''usage:
-    update listing with new terraform template
-       python mpctl.py -credsFile <path to creds yaml file> -action update_listing -fileName <fileName of ORM zip>
-
-   update listing with new image
-       python mpctl.py -credsFile <path to creds yaml file> -action update_listing -imageOcid <imageOcid>
-
-   create new terraform listing
-       python mpctl.py -credsFile <path to creds yaml file> -action create_listing -fileName <fileName of ORM zip>
-
-   create new image listing
-       python mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
-
-   get one listing
-       python mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
-
-   get all listings
-       python mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
-
-   build one listing tree
-       python mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
-
-   build all listings tree for partner
-       python mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
-
-   dump metadata file for a listing
-       python mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
-   '''
-
-    parser = argparse.ArgumentParser(prog='mpctl', description='publisher api tool', formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-action', help='action to perform')
-    parser.add_argument('-includeUnpublished', action='store_true', help='include unpublished versions when building tree')
-    parser.add_argument('-listingVersionId', type=int, help='listing version to act on')
-    parser.add_argument('-packageVersionId', type=int, help='package version to act on')
-    parser.add_argument('-termsId', type=int, help='terms to act on')
-    parser.add_argument('-termsVersionId', type=int, help='terms version to act on')
-    parser.add_argument('-artifactId', type=int, help='artifact to act on')
-    parser.add_argument('-fileName', help='name of the terraform file')
-    parser.add_argument('-imageOcid', help='ocid of the update image')
-    parser.add_argument('-credsFile', help='path to the creds file')
-
-    if len(sys.argv) == 1:
-        parser.print_help(sys.stderr)
-        sys.exit(1)
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-filename')
+    parser.add_argument('-creds')
     args = parser.parse_args()
 
     config = Config(args.credsFile)
-    if args.artifactId is not None:
-        config.artifactId = args.artifactId
-    if args.action is not None:
-        config.action = args.action
-    if args.listingVersionId is not None:
-        config.listingVersionId = args.listingVersionId
-    if args.packageVersionId is not None:
-        config.packageVersionId = args.packageVersionId
-    if args.termsId is not None:
-        config.termsId = args.termsId
-    if args.termsVersionId is not None:
-        config.termsVersionId = args.termsVersionId
-    if args.imageOcid is not None:
-        config.imageOcid = args.imageOcid
-    if not os.path.isfile('metadata.yaml'):
-        config.versionString = 'No Version'
-        if args.listingVersionId is None:
-            config.listingVersionId = 0
-    else:
-        with open('metadata.yaml', 'r') as stream:
-            metadata = yaml.safe_load(stream)
-            config.versionString = metadata['versionDetails']['versionNumber']
-            if args.listingVersionId is None:
-                config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+    config.action = 'update_listing'
 
-    if 'get' in args.action:
-        r_json = do_get_action(config)
-        print(json.dumps(r_json, indent=4, sort_keys=True))
+    with open('metadata.yaml', 'r') as stream:
+        metadata = yaml.safe_load(stream)
+        config.versionString = metadata['versionDetails']['versionNumber']
+        config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
 
-    if 'create' in args.action:
-        print(do_create())
-
-    if 'build' in args.action:
-        partner = Partner()
-        print(partner)
-
-    if 'update_listing' in args.action:
-        print(do_update_listing())
-
-    if 'dump_metadata' in args.action:
-        partner = Partner()
-        lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
-        lmd.write_metadata(f'metadata.yaml')
+    do_update_listing()
 
 class ListingMetadata:
 
@@ -427,14 +350,13 @@ def do_update_listing():
 
 
 def lookup_listingVersionId_from_listingId(listingId):
-    print('Using ' + listingId + ' to look up the listingVersionId.')
-
     config.action = 'get_listingVersions'
     listingVersions = do_get_action(config)
     for item in listingVersions['items']:
         if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
             return item['GenericListing']['listingVersionId']
-    return '0'
+    sys.exit('Cloud not find listingVersionId for listingId' + listingId + '.')
+
 
 class Config:
 
