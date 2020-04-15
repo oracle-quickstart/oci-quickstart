@@ -74,11 +74,22 @@ def set_access_token(credsFile):
 
 def lookup_listingVersionId(listingId):
     config.action = 'get_listingVersions'
-    listingVersions = do_get_action(config)
+    listingVersions = get_action(config)
     for item in listingVersions['items']:
         if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
             return item['GenericListing']['listingVersionId']
     sys.exit('Cloud not find listingVersionId for listingId' + listingId + '.')
+
+
+def get_action(config):
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    r = requests.get(uri, headers=api_headers)
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    return r_json
 
 
 def update_listing():
@@ -172,7 +183,7 @@ class Artifact:
         for resourceProperty in resource['properties']:
             config.action = 'get_artifact'
             config.artifactId = int(resourceProperty['value'])
-            r = do_get_action(config)
+            r = get_action(config)
             av = ArtifactVersion(r)
             self.versions.append(av)
 
@@ -224,11 +235,11 @@ class ListingVersion:
 
         config.action = 'get_listingVersion'
         config.listingVersionId = self.listingVersion['listingVersionId']
-        self.listingVersionDetails = do_get_action(config)
+        self.listingVersionDetails = get_action(config)
         self.listingMetadata = ListingMetadata(
             f'metadata_{config.listingVersionId}.yaml', self)
         config.action = 'get_application_packages'
-        packages = do_get_action(config)
+        packages = get_action(config)
 
         for package in packages['items']:
             if not args.includeUnpublished and package['Package']['status']['code'] == 'unpublished':
@@ -274,7 +285,7 @@ class TermVersion():
         config.action = 'get_terms_version'
         config.termsId = termsId
         config.termsVersionId = termVersion['termsVersionId']
-        tv = do_get_action(config)
+        tv = get_action(config)
         self.termVersion = tv
 
     def __str__(self):
@@ -311,7 +322,7 @@ class Partner:
             config.action = 'get_listingVersions'
         else:
             config.action = 'get_listingVersion'
-        listingVersions = do_get_action(config)
+        listingVersions = get_action(config)
 
         if 'items' in listingVersions:
             for item in listingVersions['items']:
@@ -334,7 +345,7 @@ class Partner:
             self.listings.append(listing)
 
         config.action = 'get_terms'
-        terms = do_get_action(config)
+        terms = get_action(config)
         if 'items' in terms:
             for item in terms['items']:
                 t = Terms(item['terms'])
@@ -405,17 +416,6 @@ def bind_action_dic(config):
     }
 
 
-def do_get_action(config):
-    bind_action_dic(config)
-    apicall = action_api_uri_dic[config.action]
-    uri = api_url + apicall
-    r = requests.get(uri, headers=api_headers)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json
-
-
 def get_new_versionId(config):
     config.action = 'create_new_version'
     bind_action_dic(config)
@@ -473,7 +473,7 @@ def update_version_metadata(config, newVersionId):
 def get_packageId(config, newVersionId):
     config.action = 'get_application_packages'
     config.listingVersionId = newVersionId
-    r = do_get_action(config)
+    r = get_action(config)
     return r['items'][0]['Package']['id']
 
 
