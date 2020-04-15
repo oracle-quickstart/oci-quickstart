@@ -303,7 +303,8 @@ def publish_listing(config):
 
 def create_new_listing(config):
     config.action = "get_applications"
-    file_name = "marketplace/metadata.yaml"
+    file_name = "/metadata.yaml" if os.path.isfile(
+        "/metadata.yaml") else "metadata.yaml"
     with open(file_name, 'r') as stream:
         new_listing_body = yaml.safe_load(stream)
         del new_listing_body['listingId']
