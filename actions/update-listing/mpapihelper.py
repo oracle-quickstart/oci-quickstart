@@ -34,7 +34,7 @@ class Config:
 def bind_action_dic(config):
     global action_api_uri_dic
     action_api_uri_dic = {
-        'get_listingVersions': 'appstore/publisher/v1/listings',
+        get_listingVersions': 'appstore/publisher/v1/listings',
         'get_listingVersion': f'appstore/publisher/v1/applications/{config.listingVersionId}',
         'get_artifacts': 'appstore/publisher/v1/artifacts',
         'get_artifact': f'appstore/publisher/v1/artifacts/{config.artifactId}',
@@ -60,17 +60,25 @@ def set_access_token(credsFile):
     with open(credsFile, 'r') as stream:
         creds = yaml.safe_load(stream)
 
-    auth_string = creds['client_id'] + ':' + creds['secret_key']
+    auth_string = creds['client_id']
+    auth_string += ':'
+    auth_string += creds['secret_key']
 
     encoded = base64.b64encode(auth_string.encode('ascii'))
     encoded_string = encoded.decode('ascii')
 
     token_url = 'https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials'
-    auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8', 'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650', 'Authorization': f'Basic {encoded_string}'}
+
+    auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8',
+                    'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650',
+                    'Authorization': f'Basic {encoded_string}'}
 
     r = requests.post(token_url, headers=auth_headers)
+
     access_token = json.loads(r.text).get('access_token')
-    api_headers = {'charset': 'UTF-8', 'X-Oracle-UserId': creds['user_email'], 'Authorization': f'Bearer {access_token}'}
+
+    api_headers = {'charset': 'UTF-8',
+                   'X-Oracle-UserId': creds['user_email'], 'Authorization': f'Bearer {access_token}'}
 
 
 def do_get_action(config):
@@ -104,6 +112,9 @@ def update_version_metadata(config, newVersionId):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
+    body_start = '{'
+    body_end = '}'
+    body = ''
 
     if not os.path.isfile('metadata.yaml'):
         return f'metadata file metadata.yaml not found. skipping metadata update.'
@@ -113,14 +124,11 @@ def update_version_metadata(config, newVersionId):
     updateable_items = ['longDescription', 'name', 'shortDescription',
                         'systemRequirements', 'tagLine', 'tags', 'usageInformation']
 
-    body = ''
     for k, v in metadata.items():
         if k in updateable_items:
             v = v.replace(''', ''')
             body += f''''{k}': '{v}','''
 
-    body_start = '{'
-    body_end = '}'
     body = body_start + body
     body = body[:len(body) - 1]
     body = body + body_end
@@ -171,13 +179,9 @@ def update_versioned_package_version(config, newPackageVersionId):
         service_type = 'OCIOrchestration'
     else:
         service_type = 'OCI'
-
-    body = {
-        'version': config.versionString,
-        'description': config.versionString,
-        'serviceType': service_type
-    }
-    payload = {'json': (None, str(body))}
+    body = '{'version': '' + config.versionString + '', 'description': '' + \
+        config.versionString + '', 'serviceType': '' + service_type + ''}'
+    payload = {'json': (None, body)}
     r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
         print(r.text)
@@ -190,11 +194,9 @@ def create_new_stack_artifact(config, fileName):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = {
-        'name': config.versionString,
-        'artifactType': 'TERRAFORM_TEMPLATE'
-    }
-    payload = {'json': (None, str(body))}
+    body = '{'name': '' + config.versionString + \
+        '', 'artifactType': 'TERRAFORM_TEMPLATE'}'
+    payload = {'json': (None, body)}
     index = fileName.rfind('/')
     name = fileName[index + 1:]
     files = {'file': (name, open(fileName, 'rb'))}
@@ -211,7 +213,8 @@ def create_new_image_artifact(config, old_listing_artifact_version):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     if old_listing_artifact_version is not None:
-        new_version = {key: old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
+        new_version = {key: old_listing_artifact_version[key] for key in [
+            'name', 'artifactType', 'source', 'artifactProperties']}
         new_version['name'] = config.versionString
         new_version['source']['uniqueIdentifier'] = config.imageOcid
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
