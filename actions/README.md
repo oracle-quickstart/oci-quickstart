@@ -6,7 +6,7 @@ The actions can be combined into a workflow that offers an automated way of upda
 
 ## Requirements
 
-A partner that wants to leverage the Quick Start Actions must have the following:
+A partner that wants to leverage the Quickstart Actions must have the following:
 
 -   a Quickstart repo
 -   the Terraform code must me placed under a 'terraform' directory in the repo root
