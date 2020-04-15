@@ -52,7 +52,7 @@ source:
 locale: "en"
 ```
 
-### 2. variableGroups
+### 2. VariableGroups
 
 #### Fields
 
