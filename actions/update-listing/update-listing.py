@@ -15,10 +15,7 @@ api_url = 'https://ocm-apis-cloud.oracle.com/'
 form_data_api_headers = ''
 api_headers = ''
 
-
 def main():
-    global config
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-zip_file')
     parser.add_argument('-creds')
@@ -76,8 +73,6 @@ def set_access_token(credsFile):
 
 
 def lookup_listingVersionId(listingId):
-    global config
-
     config.action = 'get_listingVersions'
     listingVersions = get_action(config)
     for item in listingVersions['items']:
