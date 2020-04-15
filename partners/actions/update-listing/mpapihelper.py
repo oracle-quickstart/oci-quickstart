@@ -11,7 +11,6 @@ api_url = "https://ocm-apis-cloud.oracle.com/"
 form_data_api_headers = ''
 api_headers = ''
 
-
 class Config:
 
     listingVersionId = None
@@ -29,7 +28,6 @@ class Config:
     def __init__(self, credsFile):
         if self.access_token is None:
             set_access_token(credsFile)
-
 
 def bind_action_dic(config):
     global action_api_uri_dic
@@ -50,7 +48,6 @@ def bind_action_dic(config):
         "new_package_version": f"appstore/publisher/v2/applications/{config.listingVersionId}/packages/{config.packageVersionId}/version",
         "upload_icon": f"appstore/publisher/v1/applications/{config.listingVersionId}/icon",
     }
-
 
 def set_access_token(credsFile):
     global access_token
@@ -78,7 +75,7 @@ def set_access_token(credsFile):
     access_token = json.loads(r.text).get('access_token')
 
     api_headers = {'charset': 'UTF-8',
-                   'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
+                             'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
 
 def do_get_action(config):
@@ -90,7 +87,6 @@ def do_get_action(config):
         print(r.text)
     r_json = json.loads(r.text)
     return r_json
-
 
 def get_new_versionId(config):
     config.action = "create_new_version"
@@ -104,7 +100,6 @@ def get_new_versionId(config):
         print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
-
 
 def update_version_metadata(config, newVersionId):
     config.action = "get_listingVersion"
@@ -121,12 +116,11 @@ def update_version_metadata(config, newVersionId):
     with open("metadata.yaml",  "r") as stream:
         metadata = yaml.safe_load(stream)
 
-    updateable_items = ['longDescription', 'name', 'shortDescription',
-                        'systemRequirements', 'tagLine', 'tags', 'usageInformation']
+    updateable_items = ['longDescription','name','shortDescription','systemRequirements','tagLine','tags','usageInformation']
 
     for k, v in metadata.items():
         if k in updateable_items:
-            v = v.replace('"', "'")
+            v = v.replace('"',"'")
             body += f""""{k}": "{v}","""
 
     body = body_start + body
@@ -145,13 +139,11 @@ def update_version_metadata(config, newVersionId):
     else:
         return r.text
 
-
 def get_packageId(config, newVersionId):
     config.action = "get_application_packages"
     config.listingVersionId = newVersionId
     r = do_get_action(config)
     return r["items"][0]["Package"]["id"]
-
 
 def get_new_packageVersionId(config, newVersionId, packageId):
     config.action = "new_package_version"
@@ -168,7 +160,6 @@ def get_new_packageVersionId(config, newVersionId, packageId):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-
 def update_versioned_package_version(config, newPackageVersionId):
     config.action = "get_application_package"
     config.packageVersionId = newPackageVersionId
@@ -179,8 +170,7 @@ def update_versioned_package_version(config, newPackageVersionId):
         service_type = "OCIOrchestration"
     else:
         service_type = "OCI"
-    body = '{"version": "' + config.versionString + '", "description": "' + \
-        config.versionString + '", "serviceType": "' + service_type + '"}'
+    body = '{"version": "' + config.versionString + '", "description": "' + config.versionString + '", "serviceType": "' + service_type + '"}'
     payload = {'json': (None, body)}
     r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
@@ -188,17 +178,15 @@ def update_versioned_package_version(config, newPackageVersionId):
     r_json = json.loads(r.text)
     return r_json["message"]
 
-
 def create_new_stack_artifact(config, fileName):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"name": "' + config.versionString + \
-        '", "artifactType": "TERRAFORM_TEMPLATE"}'
+    body = '{"name": "' + config.versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     index = fileName.rfind("/")
-    name = fileName[index + 1:]
+    name = fileName[index+1:]
     files = {'file': (name, open(fileName, 'rb'))}
     r = requests.post(uri, headers=api_headers, files=files, data=payload)
     if r.status_code > 299:
@@ -206,22 +194,19 @@ def create_new_stack_artifact(config, fileName):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-
 def create_new_image_artifact(config, old_listing_artifact_version):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     if old_listing_artifact_version is not None:
-        new_version = {key: old_listing_artifact_version[key] for key in [
-            'name', 'artifactType', 'source', 'artifactProperties']}
+        new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
         new_version['name'] = config.versionString
         new_version['source']['uniqueIdentifier'] = config.imageOcid
         new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
         body = json.dumps(new_version)
     else:
-        file_name = "/newImage.json" if os.path.isfile(
-            "/newImage.json") else "newImage.json"
+        file_name = "/newImage.json" if os.path.isfile("/newImage.json") else "newImage.json"
         with open(file_name, "r") as file_in:
             body = file_in.read()
         body = body.replace("%%NAME%%", config.versionString)
@@ -235,11 +220,9 @@ def create_new_image_artifact(config, old_listing_artifact_version):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-
 def associate_artifact_with_package(config, artifactId, newPackageVersionId):
 
-    file_name = "/newArtifact.json" if os.path.isfile(
-        "/newArtifact.json") else "newArtifact.json"
+    file_name = "/newArtifact.json" if os.path.isfile("/newArtifact.json") else "newArtifact.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ARTID%%", artifactId)
@@ -261,7 +244,6 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId):
     r_json = json.loads(r.text)
     return r_json["message"]
 
-
 def submit_listing(config):
     autoApprove = "true"
     while (True):
@@ -269,7 +251,7 @@ def submit_listing(config):
         bind_action_dic(config)
         apicall = action_api_uri_dic[config.action]
         uri = api_url + apicall
-        body = '{"action": "submit", "note": "submitting new version", "autoApprove": "' + autoApprove + '"}'
+        body = '{"action": "submit", "note": "submitting new version", "autoApprove": "'+ autoApprove +'"}'
         api_headers['Content-Type'] = 'application/json'
         r = requests.patch(uri, headers=api_headers, data=body)
         del api_headers['Content-Type']
@@ -282,6 +264,7 @@ def submit_listing(config):
             return "this partner has not yet been approved for auto approval. please contact MP admin."
         else:
             autoApprove = "false"
+
 
 
 def publish_listing(config):
@@ -301,12 +284,10 @@ def publish_listing(config):
     else:
         return "Failed to auto-publish, please contact MP admin to maunaully approve listing."
 
-
 def create_new_listing(config):
 
     config.action = "get_applications"
-    file_name = "/metadata.yaml" if os.path.isfile(
-        "/metadata.yaml") else "metadata.yaml"
+    file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
     with open(file_name, 'r') as stream:
         new_listing_body = yaml.safe_load(stream)
         del new_listing_body['listingId']
@@ -314,8 +295,7 @@ def create_new_listing(config):
         vd = new_listing_body['versionDetails']
         config.versionString = vd['versionNumber']
         if 'releaseDate' in vd:
-            new_listing_body['versionDetails']['releaseDate'] = str(
-                new_listing_body['versionDetails']['releaseDate'])
+            new_listing_body['versionDetails']['releaseDate'] = str(new_listing_body['versionDetails']['releaseDate'])
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
@@ -328,10 +308,8 @@ def create_new_listing(config):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
-
 def create_new_package(config, artifactId):
-    file_name = "/newPackage.json" if os.path.isfile(
-        "/newPackage.json") else "newPackage.json"
+    file_name = "/newPackage.json" if os.path.isfile("/newPackage.json") else "newPackage.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ART_ID%%", artifactId)
@@ -349,7 +327,6 @@ def create_new_package(config, artifactId):
     r_json = json.loads(r.text)
     return r_json["message"]
 
-
 def upload_icon(config):
     config.action = "upload_icon"
     bind_action_dic(config)
@@ -362,3 +339,4 @@ def upload_icon(config):
         print(r.text)
     r_json = json.loads(r.text)
     return r_json["entityId"]
+
