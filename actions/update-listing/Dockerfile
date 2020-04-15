@@ -3,11 +3,11 @@ FROM rackspacedot/python37:latest
 LABEL "name"="Update Listing"
 LABEL "version"="1.0"
 
-COPY __init__.py /
 COPY entrypoint.sh /
-COPY mpapihelper.py /
-COPY mpctl.py /
 COPY newArtifact.json /
-COPY newImage.json /
 COPY newPackage.json /
+COPY newImage.json /
+COPY mpctl.py /
+COPY mpapihelper.py /
+COPY __init__.py /
 ENTRYPOINT ["/entrypoint.sh"]
