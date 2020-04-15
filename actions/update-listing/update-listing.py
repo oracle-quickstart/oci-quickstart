@@ -6,8 +6,9 @@ import base64
 import yaml
 import os.path
 
-
+args = None
 config = None
+
 action_api_uri_dic = {}
 access_token = ''
 creds = {}
@@ -17,6 +18,7 @@ api_headers = ''
 
 
 def main():
+    global args
     global config
 
     parser = argparse.ArgumentParser()
@@ -98,7 +100,9 @@ def get_action(config):
 
 
 def update_listing():
+    global args
     global config
+
     partner = Partner()
 
     artifactId = create_new_stack_artifact(config, args.zip_file)
@@ -362,7 +366,9 @@ class Partner:
 
 
 def do_create():
+    global args
     global config
+
     file_name = 'marketplace/icon.png'
     if not os.path.isfile(file_name):
         return ('icon.png file not found in workspace directory. exiting.')
