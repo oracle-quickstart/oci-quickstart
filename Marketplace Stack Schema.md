@@ -21,7 +21,7 @@ In order to enable any user - technical or non-technical to launch a Marketplace
 
 ## YAML Schema Building Blocks
 
-### 1. Marketplace Application Information tab
+### 1.Marketplace Application Information tab
 
 This block contains general information related to the listing that is displayed in the Application Information tab in the OCI Console, e.g. application description, logo/icon URL, listing-id, content-language and  some boilerplate code related to the schema version.
 
@@ -52,7 +52,7 @@ source:
 locale: "en"
 ```
 
-### 2. VariableGroups
+### 2.VariableGroups
 
 #### Fields
 
@@ -87,7 +87,7 @@ variableGroups:
             - false
 ```
 
-### 3. Terraform Variables
+### 3.Terraform Variables
 
 Use this section to declare all Terraform Input variables that are presented in your Template. All variables in the Terraform Root Module should be declared.
 
@@ -191,7 +191,7 @@ myVcn:
     visible: ${useExistingVcn}
 ```
 
-### 4. Terraform Outputs
+### 4.Terraform Outputs
 
 #### Fields
 
@@ -245,7 +245,7 @@ outputs:
     title: Rest API
 ```
 
-### 5. Primary Output Button
+### 5.Primary Output Button
 
 #### Fields
 
