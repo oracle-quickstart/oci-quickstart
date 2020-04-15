@@ -24,7 +24,7 @@ def main():
     config = Config(args.creds)
     config.action = 'update_listing'
 
-    with open('metadata.yaml', 'r') as stream:
+    with open('marketplace/metadata.yaml', 'r') as stream:
         metadata = yaml.safe_load(stream)
         config.versionString = metadata['versionDetails']['versionNumber']
         config.listingVersionId = lookup_listingVersionId(metadata['listingId'])
@@ -145,7 +145,7 @@ class ListingMetadata:
     def write_metadata(self, file_name):
 
         if file_name is None:
-            file_name = f'metadata.yaml'
+            file_name = f'marketplace/metadata.yaml'
 
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
@@ -437,9 +437,9 @@ def update_version_metadata(config, newVersionId):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
 
-    if not os.path.isfile('metadata.yaml'):
-        return f'metadata file metadata.yaml not found. skipping metadata update.'
-    with open('metadata.yaml',  'r') as stream:
+    if not os.path.isfile('marketplace/metadata.yaml'):
+        return f'metadata file marketplace/metadata.yaml not found. skipping metadata update.'
+    with open('marketplace/metadata.yaml',  'r') as stream:
         metadata = yaml.safe_load(stream)
 
     updateable_items = ['longDescription', 'name', 'shortDescription',
