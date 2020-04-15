@@ -16,7 +16,7 @@ Bastion hosts are part of a broken security model developed by people who never 
 Yes, those are nifty features of Terraform.  That doesn't mean you have to use them.  Before Terraform there was cloud-init.  It's more scalable than SSH'ing into each node.  It's more robust to connectivity issues (like closing your laptop before deploy is done) and it runs asynchronously.  Beyond that, it's the model every other cloud uses.  We use it wherever we can.  If there's some reason we can, then fine, drop down to SSH'ing to a node.
 
 ## Reference oci-quickstart-prerequisites or oke-quickstart-prerequisites
-Don't create individual env-vars files.  Don't provide an OCI how to in each repo.  Otherwise we're going to end up maintaining many copies of the same thing.
+Don't create individual env-vars files.  Don't provide an oci how to in each repo.  Otherwise we're going to end up maintaining many copies of the same thing.
 
 ## Repo Structure
 * A Quick Start will always be some collection of TF and shell.
