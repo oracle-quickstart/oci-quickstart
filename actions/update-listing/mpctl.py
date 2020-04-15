@@ -44,7 +44,7 @@ def main():
     parser.add_argument('-termsId', type=int, help='terms to act on')
     parser.add_argument('-termsVersionId', type=int, help='terms version to act on')
     parser.add_argument('-artifactId', type=int, help='artifact to act on')
-    parser.add_argument('-fileName', help='name of the TF file')
+    parser.add_argument('-fileName', help='name of the terraform file')
     parser.add_argument('-imageOcid', help='ocid of the update image')
     parser.add_argument('-credsFile', help='path to the creds file')
 
