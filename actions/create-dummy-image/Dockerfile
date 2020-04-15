@@ -1,6 +1,6 @@
 FROM golang:1.14
 
-LABEL "name"="Create Image"
+LABEL "name"="Create Dummy Image"
 LABEL "version"="1.0"
 
 COPY marketplace_image.json /
