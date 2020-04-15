@@ -246,7 +246,7 @@ class ListingVersion:
         packages = get_action(config)
 
         for package in packages['items']:
-            if not args.includeUnpublished and package['Package']['status']['code'] == 'unpublished':
+            if package['Package']['status']['code'] == 'unpublished':
                 continue
             p = Package(package)
             self.packages.append(p)
@@ -324,7 +324,7 @@ class Partner:
 
         if 'items' in listingVersions:
             for item in listingVersions['items']:
-                if not args.includeUnpublished and item['GenericListing']['status']['code'] == 'UNPUBLISHED':
+                if item['GenericListing']['status']['code'] == 'UNPUBLISHED':
                     continue
                 found = False
                 for listing in self.listings:
