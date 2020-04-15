@@ -316,10 +316,12 @@ def publish_listing(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{'action': 'publish'}'
+
     api_headers['Content-Type'] = 'application/json'
-    r = requests.patch(uri, headers=api_headers, data=body)
-    del api_headers['Content-Type']
+    body = {'action': 'publish'}
+    r = requests.patch(uri, headers=api_headers, data=str(body))
+
+    del api_headers['Content-Type'] ####why would you delete this?
     if r.status_code > 299:
         print(r.text)
     r_json = json.loads(r.text)
