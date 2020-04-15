@@ -1,5 +1,6 @@
 #!/bin/bash
 sudo apt-get update
+#sudo apt-get -y upgrade
 sudo apt install -y build-essential unzip zip go-dep jq
 
 #Installing go
