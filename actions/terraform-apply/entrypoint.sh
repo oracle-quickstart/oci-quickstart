@@ -14,7 +14,7 @@ mkdir -p $HOME/go/src/terratest/test
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$GOROOT/bin:$GOPATH/bin:/usr/bin:$PATH
-mv /terratest.go $HOME/go/src/terratest/test
+mv /quickstart-terraform-test.go $HOME/go/src/terratest/test
 cd $HOME/go/src/terratest/test
 
 # Declare Terratest Dependency
