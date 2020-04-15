@@ -148,10 +148,7 @@ class ArtifactVersion:
         self.details = details
 
     def __str__(self):
-        ppstring = ''
-        ppstring += "\n"
-        ppstring += json.dumps(self.details, indent=4, sort_keys=False)
-        return ppstring
+        return '\n' + json.dumps(self.details, indent=4, sort_keys=False)
 
 
 class Artifact:
