@@ -7,4 +7,7 @@ COPY __init__.py /
 COPY entrypoint.sh /
 COPY mpapihelper.py /
 COPY mpctl.py /
+COPY newArtifact.json /
+COPY newImage.json /
+COPY newPackage.json /
 ENTRYPOINT ["/entrypoint.sh"]
