@@ -14,6 +14,8 @@
     "region": "us-ashburn-1",
     "subnet_ocid": "ocid1.subnet.oc1.iad.aaaaaaaadyszurgvm3sg4ap5zskhtymtnzpkmzlqmp44wao6vjxzjvfexoeq",
     "type": "oracle-oci"
+
+
   }],
   "provisioners": [{
     "type": "shell",
@@ -21,6 +23,7 @@
       "#!/usr/bin/env bash",
       "sudo /usr/libexec/oci-image-cleanup -f"
     ]
+
   }],
   "post-processors": [
     [{
