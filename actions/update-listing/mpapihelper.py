@@ -240,7 +240,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         }
 
     api_headers['Content-Type'] = 'application/json'
-    r = requests.post(uri, headers=api_headers, data=str(body))
+    r = requests.post(uri, headers=api_headers, data=body)
     del api_headers['Content-Type']
     if r.status_code > 299:
         print(r.text)
