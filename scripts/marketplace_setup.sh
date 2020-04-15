@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# This script sets permissions in your OCI tenancy so it can be used to publish Marketplace images.
-
 # To test run: export TESTING="true"
 # To clear: unset TESTING
 
