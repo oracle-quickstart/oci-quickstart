@@ -419,8 +419,6 @@ def do_update_listing():
 
 
 def lookup_listingVersionId_from_listingId(listingId):
-    print('Using ' + listingId + ' to look up the listingVersionId.')
-
     config.action = "get_listingVersions"
     listingVersions = do_get_action(config)
     for item in listingVersions['items']:
