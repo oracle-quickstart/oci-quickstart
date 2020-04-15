@@ -6,7 +6,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestTerraform(t *testing.T) {
+func TestQuickstartTerraformCode(t *testing.T) {
 	t.Parallel()
 	terraformOptions := &terraform.Options{
 		TerraformDir: os.Getenv("TF_ACTION_WORKING_DIR"),
