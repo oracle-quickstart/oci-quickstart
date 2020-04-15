@@ -234,7 +234,8 @@ class ListingVersion:
         ppstring += "\n"
         ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
         ppstring += "\n"
-        ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listingVersionDetails,
+                               indent=4, sort_keys=False)
         ppstring += "\n"
         ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
         for package in self.packages:
