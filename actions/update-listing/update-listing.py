@@ -236,8 +236,7 @@ class ListingVersion:
         config.action = 'get_listingVersion'
         config.listingVersionId = self.listingVersion['listingVersionId']
         self.listingVersionDetails = get_action(config)
-        self.listingMetadata = ListingMetadata(
-            f'metadata_{config.listingVersionId}.yaml', self)
+        self.listingMetadata = ListingMetadata(f'metadata_{config.listingVersionId}.yaml', self)
         config.action = 'get_application_packages'
         packages = get_action(config)
 
@@ -300,8 +299,7 @@ class Terms():
             self.termVersions.append(tv)
 
     def __str__(self):
-        ppstring = ''
-        ppstring += str(self.terms)
+        ppstring = str(self.terms)
         for termVersion in self.termVersions:
             ppstring += str(termVersion)
         return ppstring
@@ -326,8 +324,7 @@ class Partner:
                 found = False
                 for listing in self.listings:
                     if listing.listingId == item['GenericListing']['listingId']:
-                        listing.listingVersions.append(
-                            ListingVersion(item['GenericListing']))
+                        listing.listingVersions.append(ListingVersion(item['GenericListing']))
                         found = True
                         break
 
@@ -350,12 +347,9 @@ class Partner:
             self.terms.append(t)
 
     def __str__(self):
-        ppstring = ''
-        ppstring += (f'The parnter has {len(self.listings)} listing(s)')
-        ppstring += '\n'
+        ppstring = (f'The parnter has {len(self.listings)} listing(s)') + '\n'
         for listing in self.listings:
-            ppstring += str(listing)
-            ppstring += '\n'
+            ppstring += str(listing) + '\n'
         ppstring += '\n'
         for terms in self.terms:
             ppstring += str(terms)
@@ -437,8 +431,7 @@ def update_version_metadata(config, newVersionId):
     with open('marketplace/metadata.yaml',  'r') as stream:
         metadata = yaml.safe_load(stream)
 
-    updateable_items = ['longDescription', 'name', 'shortDescription',
-                        'systemRequirements', 'tagLine', 'tags', 'usageInformation']
+    updateable_items = ['longDescription', 'name', 'shortDescription', 'systemRequirements', 'tagLine', 'tags', 'usageInformation']
 
     body = ''
     for k, v in metadata.items():
@@ -446,11 +439,8 @@ def update_version_metadata(config, newVersionId):
             v = v.replace(''', ''')
             body += f''''{k}': '{v}','''
 
-    body_start = '{'
-    body_end = '}'
-    body = body_start + body
     body = body[:len(body) - 1]
-    body = body + body_end
+    body = '{' + body + '}'
     body = body.encode('unicode_escape').decode('utf-8')
 
     api_headers['Content-Type'] = 'application/json'
