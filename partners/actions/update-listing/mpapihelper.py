@@ -111,9 +111,11 @@ def update_version_metadata(config, newVersionId):
     body_end = '}'
     body = ""
 
-    if not os.path.isfile("metadata.yaml"):
+    # a github action puts things in a chroot jail
+    file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
+    if not os.path.isfile(file_name):
         return f"metadata file metadata.yaml not found. skipping metadata update."
-    with open("metadata.yaml",  "r") as stream:
+    with open(file_name,  "r") as stream:
         metadata = yaml.safe_load(stream)
 
     updateable_items = ['longDescription','name','shortDescription','systemRequirements','tagLine','tags','usageInformation']
@@ -206,6 +208,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
         body = json.dumps(new_version)
     else:
+        # a github action puts things in a chroot jail
         file_name = "/newImage.json" if os.path.isfile("/newImage.json") else "newImage.json"
         with open(file_name, "r") as file_in:
             body = file_in.read()
@@ -222,6 +225,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId):
 
+    # a github action puts things in a chroot jail
     file_name = "/newArtifact.json" if os.path.isfile("/newArtifact.json") else "newArtifact.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
@@ -287,6 +291,7 @@ def publish_listing(config):
 def create_new_listing(config):
 
     config.action = "get_applications"
+    # a github action puts things in a chroot jail
     file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
     with open(file_name, 'r') as stream:
         new_listing_body = yaml.safe_load(stream)
@@ -309,6 +314,7 @@ def create_new_listing(config):
     return r_json["entityId"]
 
 def create_new_package(config, artifactId):
+    # a github action puts things in a chroot jail
     file_name = "/newPackage.json" if os.path.isfile("/newPackage.json") else "newPackage.json"
     with open(file_name, "r") as file_in:
         body = file_in.read()
@@ -332,7 +338,8 @@ def upload_icon(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png"
+    # a github action puts things in a chroot jail
+    file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png" if os.path.isfile("icon.png") else "/images/icon.png" if os.path.isfile("/images/icon.png") else "images/icon.png" 
     files = {'image': open(file_name, 'rb')}
     r = requests.post(uri, headers=api_headers, files=files)
     if r.status_code > 299:
