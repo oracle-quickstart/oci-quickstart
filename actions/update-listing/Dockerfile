@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python
 
 LABEL "name"="Update Listing"
 LABEL "version"="1.0"
