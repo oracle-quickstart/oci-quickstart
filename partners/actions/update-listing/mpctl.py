@@ -227,7 +227,7 @@ class Partner:
 
     def __init__(self):
         global config
-        if config.listingVersionId is None:
+        if config.listingVersionId is None or config.listingVersionId == 0:
             config.action = "get_listingVersions"
         else:
             config.action = "get_listingVersion"
