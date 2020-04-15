@@ -6,13 +6,14 @@ import base64
 import yaml
 import os.path
 
+
+config = None
 action_api_uri_dic = {}
 access_token = ''
 creds = {}
 api_url = 'https://ocm-apis-cloud.oracle.com/'
 form_data_api_headers = ''
 api_headers = ''
-config = None
 
 def main():
     parser = argparse.ArgumentParser()
@@ -26,9 +27,91 @@ def main():
     with open('metadata.yaml', 'r') as stream:
         metadata = yaml.safe_load(stream)
         config.versionString = metadata['versionDetails']['versionNumber']
-        config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+        config.listingVersionId = lookup_listingVersionId(metadata['listingId'])
 
-    do_update_listing()
+    update_listing()
+
+
+class Config:
+
+    listingVersionId = None
+    artifactId = None
+    packageVersionId = None
+    termsId = None
+    termsVersionId = None
+    action = None
+    access_token = None
+    imageOcid = None
+    credsFile = None
+    metadataFile = None
+    versionString = None
+
+    def __init__(self, credsFile):
+        if self.access_token is None:
+            set_access_token(credsFile)
+
+
+def set_access_token(credsFile):
+    global access_token
+    global creds
+    global api_headers
+
+    with open(credsFile, 'r') as stream:
+        creds = yaml.safe_load(stream)
+
+    auth_string = creds['client_id'] + ':' + creds['secret_key']
+
+    encoded = base64.b64encode(auth_string.encode('ascii'))
+    encoded_string = encoded.decode('ascii')
+
+    token_url = 'https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials'
+    auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8', 'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650', 'Authorization': f'Basic {encoded_string}'}
+
+    r = requests.post(token_url, headers=auth_headers)
+    access_token = json.loads(r.text).get('access_token')
+    api_headers = {'charset': 'UTF-8', 'X-Oracle-UserId': creds['user_email'], 'Authorization': f'Bearer {access_token}'}
+
+
+def lookup_listingVersionId(listingId):
+    config.action = 'get_listingVersions'
+    listingVersions = do_get_action(config)
+    for item in listingVersions['items']:
+        if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
+            return item['GenericListing']['listingVersionId']
+    sys.exit('Cloud not find listingVersionId for listingId' + listingId + '.')
+
+
+def update_listing():
+    global config
+    partner = Partner()
+
+    artifactId = create_new_stack_artifact(config, args.fileName)
+    newVersionId = get_new_versionId(config)
+
+    file_name = f'metadata_{args.listingVersionId}.yaml'
+    config.metadataFile = file_name
+    updated_metadata_message = update_version_metadata(config, newVersionId)
+
+    # get the package version id needed for package version creation
+    packageId = get_packageId(config, newVersionId)
+
+    # create a package version from existing package
+    newPackageVersionId = get_new_packageVersionId(config, newVersionId, packageId)
+
+    # update versioned package details
+    message = update_versioned_package_version(config, newPackageVersionId)
+
+    # update versioned package details - associate newly created artifact
+    message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
+
+    # submit the new version of the listing for approval
+    message = submit_listing(config)
+
+    # attempt to publish the listing (succeeds if partner is whitelisted)
+    message = publish_listing(config)
+
+    return message
+
 
 class ListingMetadata:
 
@@ -301,82 +384,6 @@ def do_create():
     return message
 
 
-def do_update_listing():
-    global config
-    partner = Partner()
-
-    if config.imageOcid is not None:
-        old_listing_artifact_version = partner.listings[0].listingVersions[
-            0].packages[0].artifacts[0].versions[0].details
-
-    # TODO: surround this if else with retry loop while status is 'in validation'
-
-    if config.imageOcid is None:
-        # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.fileName)
-    else:
-        # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(
-            config, old_listing_artifact_version)
-
-    # create a new version for the application listing
-    newVersionId = get_new_versionId(config)
-
-    file_name = f'metadata_{args.listingVersionId}.yaml'
-    config.metadataFile = file_name
-    updated_metadata_message = update_version_metadata(config, newVersionId)
-
-    # get the package version id needed for package version creation
-    packageId = get_packageId(config, newVersionId)
-
-    # create a package version from existing package
-    newPackageVersionId = get_new_packageVersionId(
-        config, newVersionId, packageId)
-
-    # update versioned package details
-    message = update_versioned_package_version(config, newPackageVersionId)
-
-    # update versioned package details - associate newly created artifact
-    message = associate_artifact_with_package(
-        config, artifactId, newPackageVersionId)
-
-    # submit the new version of the listing for approval
-    message = submit_listing(config)
-
-    # attempt to publish the listing (succeeds if partner is whitelisted)
-    message = publish_listing(config)
-
-    return message
-
-
-def lookup_listingVersionId_from_listingId(listingId):
-    config.action = 'get_listingVersions'
-    listingVersions = do_get_action(config)
-    for item in listingVersions['items']:
-        if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
-            return item['GenericListing']['listingVersionId']
-    sys.exit('Cloud not find listingVersionId for listingId' + listingId + '.')
-
-
-class Config:
-
-    listingVersionId = None
-    artifactId = None
-    packageVersionId = None
-    termsId = None
-    termsVersionId = None
-    action = None
-    access_token = None
-    imageOcid = None
-    credsFile = None
-    metadataFile = None
-    versionString = None
-
-    def __init__(self, credsFile):
-        if self.access_token is None:
-            set_access_token(credsFile)
-
-
 def bind_action_dic(config):
     global action_api_uri_dic
     action_api_uri_dic = {
@@ -396,27 +403,6 @@ def bind_action_dic(config):
         'new_package_version': f'appstore/publisher/v2/applications/{config.listingVersionId}/packages/{config.packageVersionId}/version',
         'upload_icon': f'appstore/publisher/v1/applications/{config.listingVersionId}/icon',
     }
-
-
-def set_access_token(credsFile):
-    global access_token
-    global creds
-    global api_headers
-
-    with open(credsFile, 'r') as stream:
-        creds = yaml.safe_load(stream)
-
-    auth_string = creds['client_id'] + ':' + creds['secret_key']
-
-    encoded = base64.b64encode(auth_string.encode('ascii'))
-    encoded_string = encoded.decode('ascii')
-
-    token_url = 'https://login.us2.oraclecloud.com:443/oam/oauth2/tokens?grant_type=client_credentials'
-    auth_headers = {'Content-Type': 'application/x-www-form-urlencoded', 'charset': 'UTF-8', 'X-USER-IDENTITY-DOMAIN-NAME': 'usoracle30650', 'Authorization': f'Basic {encoded_string}'}
-
-    r = requests.post(token_url, headers=auth_headers)
-    access_token = json.loads(r.text).get('access_token')
-    api_headers = {'charset': 'UTF-8', 'X-Oracle-UserId': creds['user_email'], 'Authorization': f'Bearer {access_token}'}
 
 
 def do_get_action(config):
