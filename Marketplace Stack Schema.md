@@ -21,7 +21,7 @@ In order to enable any user - technical or non-technical to launch a Marketplace
 
 ## YAML Schema Building Blocks
 
-### 1. Marketplace Application Information Tab
+### 1. Marketplace Application Information tab
 
 This block contains general information related to the listing that is displayed in the Application Information tab in the OCI Console, e.g. application description, logo/icon URL, listing-id, content-language and  some boilerplate code related to the schema version.
 
