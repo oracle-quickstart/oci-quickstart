@@ -17,11 +17,11 @@ api_headers = ''
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-zip_file')
+    parser.add_argument('-filename')
     parser.add_argument('-creds')
     args = parser.parse_args()
 
-    config = Config(args.creds)
+    config = Config(args.credsFile)
     config.action = 'update_listing'
 
     with open('metadata.yaml', 'r') as stream:
@@ -85,7 +85,7 @@ def update_listing():
     global config
     partner = Partner()
 
-    artifactId = create_new_stack_artifact(config, args.zip_file)
+    artifactId = create_new_stack_artifact(config, args.fileName)
     newVersionId = get_new_versionId(config)
 
     file_name = f'metadata_{args.listingVersionId}.yaml'
@@ -368,7 +368,7 @@ def do_create():
     # TODO: surround with retry loop if image is still in validation
     if config.imageOcid is None:
         # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.zip_file)
+        artifactId = create_new_stack_artifact(config, args.fileName)
     else:
         # create new artifact for iamge listing
         artifactId = create_new_image_artifact(config, None)
