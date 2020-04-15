@@ -1,4 +1,4 @@
-FROM golang:1.14
+FROM golang:1.13
 
 LABEL "name"="Build ORM Zip"
 LABEL "version"="1.0"
