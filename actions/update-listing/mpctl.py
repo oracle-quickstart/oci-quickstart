@@ -36,17 +36,20 @@ def main():
        python mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
    '''
 
-    parser = argparse.ArgumentParser(prog='mpctl', description='publisher api tool', formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-action', help='action to perform')
+    parser = argparse.ArgumentParser(prog='mpctl',
+                                     description='publisher api tool',
+                                     epilog=usage_text,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-action', help='the action to perform')
     parser.add_argument('-includeUnpublished', action='store_true', help='include unpublished versions when building tree')
-    parser.add_argument('-listingVersionId', type=int, help='listing version to act on')
-    parser.add_argument('-packageVersionId', type=int, help='package version to act on')
-    parser.add_argument('-termsId', type=int, help='terms to act on')
-    parser.add_argument('-termsVersionId', type=int, help='terms version to act on')
-    parser.add_argument('-artifactId', type=int, help='artifact to act on')
-    parser.add_argument('-fileName', help='name of the TF file')
-    parser.add_argument('-imageOcid', help='ocid of the update image')
-    parser.add_argument('-credsFile', help='path to the creds file')
+    parser.add_argument('-listingVersionId', type=int, help='the listing version to act on')
+    parser.add_argument('-packageVersionId', type=int, help='the package version to act on')
+    parser.add_argument('-termsId', type=int, help='the terms to act on')
+    parser.add_argument('-termsVersionId', type=int, help='the terms version to act on')
+    parser.add_argument('-artifactId', type=int, help='the artifact to act on')
+    parser.add_argument('-fileName', help='the name of the TF file')
+    parser.add_argument('-imageOcid', help='the ocid of the update image')
+    parser.add_argument('-credsFile', help='the path to the creds file')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -78,7 +81,8 @@ def main():
             metadata = yaml.safe_load(stream)
             config.versionString = metadata['versionDetails']['versionNumber']
             if args.listingVersionId is None:
-                config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+                config.listingVersionId = lookup_listingVersionId_from_listingId(
+                    metadata['listingId'])
 
     if "get" in args.action:
         r_json = do_get_action(config)
