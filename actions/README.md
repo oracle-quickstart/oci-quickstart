@@ -21,46 +21,66 @@ A partner that wants to leverage the Quickstart Actions must have the following:
 
 A good example of such a repo is https://github.com/oracle-quickstart/oci-h2o
 
-## terraform-apply
+## Available actions
+
+Currently there is a limited number of actions available, which can support the automated update of an existing marketplace listing.
+
+### terraform-test
+
 This action will test any Terraform code that is under the 'terraform' directory in the repo root. The action will create and then destroy all resources.  The action uses [Terratest](https://github.com/gruntwork-io/terratest). No other assertions are being performed currently.
 
-## build-orm-zip
+### create-stack
+
 This action packages the terraform code from the partner repo into an archive that can be later submitted to the marketplace.
 
-## create-image
-This action creates a marketplace ready image that is based on an existing OCI platform image.
+### create-dummy-image
 
-## update-listing
+This action will a marketplace-ready image that is based on an existing OCI platform image.
+
+### create-partner-image
+
+Similar to the above actions, but this action accepts an OCI image OCID as input. Partners can use their own custom images as baseline and create marketplace-ready images that include their software.  See the workflow example below for syntax.
+
+### update-listings
+
 This actions takes as input a OCI custom image OCID and a stack archive (terraform provisioning code) and used the API_creds secret to update an existing Marketplace listing with the new code or software that has been updated in the repo.
 
-## Example Workflow
+## Example workflow
 
 ```
 on:
   push:
     branches:
-      - 'master'
-name:                          Marketplace
+      - 'development'
+name: OCI-Marketplace
 jobs:
-  update-stack-listing:
-    name:                      Update Stack Listing
-    runs-on:                   ubuntu-latest
+  test-terraform-code:
+    name: Update Marketplace Stack Listing
+    runs-on: ubuntu-latest
     env:
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_compartment_ocid }}
-      TF_VAR_fingerprint:      ${{ secrets.TF_VAR_fingerprint }}
-      TF_VAR_private_key:      ${{ secrets.TF_VAR_private_key }}
+      TF_VAR_fingerprint: ${{ secrets.TF_VAR_fingerprint }}
+      TF_VAR_private_key: ${{ secrets.TF_VAR_private_key }}
       TF_VAR_private_key_path: $GITHUB_WORKSPACE/oci.pem
-      TF_VAR_tenancy_ocid:     ${{ secrets.TF_VAR_tenancy_ocid }}
-      TF_VAR_user_ocid:        ${{ secrets.TF_VAR_user_ocid }}
-      API_CREDS:               ${{ secrets.API_CREDS }}
+      TF_VAR_tenancy_ocid: ${{ secrets.TF_VAR_tenancy_ocid }}
+      TF_VAR_user_ocid: ${{ secrets.TF_VAR_user_ocid }}
     steps:
-    - name:                    Checkout
-      uses:                    actions/checkout@master
-    - name:                    Terraform Apply
-      uses:                    "oci-quickstart/oci-quickstart/actions/terraform-apply@master"
-    - name:                    Build ORM Zip
-      uses:                    "oci-quickstart/oci-quickstart/actions/build-orm-zip@master"
-      if:                      success()
-    - name:                    Update Listing
-      uses:                    "oci-quickstart/oci-quickstart/actions/update-listing@master"
+    - uses: actions/checkout@master
+      name: Checkout Quickstart Repo
+      with:
+              ref: development
+    - uses: "oci-quickstart/oci-quickstart/partners/actions/terraform-test@v0.91"
+      name: Test Terraform Code
+    - uses: "oci-quickstart/oci-quickstart/partners/actions/create-stack@v0.91"
+      name: Create Stack Archive
+      if: success()
+    #- user: "oci-quickstart/oci-quickstart/partners/actions/create-dummy-image@v0.91"
+    #  name: Create Dummy Image
+    - uses: "oci-quickstart/oci-quickstart/partners/actions/create-partner-image@v0.91"
+      name: Create Partner Marketplace-ready Image
+      with:
+        base-image: 'ocid1.image.oc1.iad.aaaaaaaavxqdkuyamlnrdo3q7qa7q3tsd6vnyrxjy3nmdbpv7fs7um53zh5q'
+    - uses: "oci-quickstart/oci-quickstart/partners/actions/update-listing@v0.91"
+      name: Update Marketplace Listing
+
 ```
