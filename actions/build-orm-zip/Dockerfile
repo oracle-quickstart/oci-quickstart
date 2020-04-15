@@ -1,3 +1,5 @@
+FROM scratch
+
 LABEL "name"="Build ORM Zip"
 LABEL "version"="1.0"
 
