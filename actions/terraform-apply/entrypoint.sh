@@ -18,7 +18,7 @@ mv /quickstart-terraform-test.go $HOME/go/src/terratest/test
 cd $HOME/go/src/terratest/test
 
 #Install terratest and dependencies
-cat << EOF > Gopkg.toml
+cat  << EOF > Gopkg.toml
 [[constraint]]
   name = "github.com/gruntwork-io/terratest"
   version = "0.19.1"
