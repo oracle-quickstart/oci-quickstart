@@ -220,24 +220,12 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
         body = json.dumps(new_version)
     else:
-        body = {
-            'name': config.versionString,
-            'artifactType': 'OCI_COMPUTE_IMAGE',
-            'source': {
-                'regionCode': 'us-ashburn-1',
-                'uniqueIdentifier': config.imageOcid
-            },
-            'artifactProperties': [
-                {
-                    'artifactTypePropertyName': 'compartmentOCID',
-                    'value': 'ocid1.compartment.oc1..aaaaaaaaxrcshrhpq6exsqibhdzseghk4yjgrwxn3uaev6poaek2ooz4n7eq'
-                },
-                {
-                    'artifactTypePropertyName': 'ociTenancyID',
-                    'value': '59030347'
-                }
-            ]
-        }
+        file_name = '/newImage.json' if os.path.isfile(
+            '/newImage.json') else 'newImage.json'
+        with open(file_name, 'r') as file_in:
+            body = file_in.read()
+        body = body.replace('%%NAME%%', config.versionString)
+        body = body.replace('%%OCID%%', config.imageOcid)
 
     api_headers['Content-Type'] = 'application/json'
     r = requests.post(uri, headers=api_headers, data=body)
