@@ -45,11 +45,11 @@ func TestQuickstartTerraformCode(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the values of output variables
-	//driverlessAiUrl := terraform.Output(t, terraformOptions, "Driverless_AI_URL")
-
+	//driverlessAiUrl := terraform.Output(t, terraformOptions, "Driverless_AI_URL") 
+    
 	// Verify we're getting back the outputs we expect
 	//assert.Equal(t, expectedMap, actualExampleMap)
-
+	
 	// It can take a minute or so for the Instance to boot up, so retry a few times
 	//maxRetries := 10
 	//timeBetweenRetries := 5 * time.Second
