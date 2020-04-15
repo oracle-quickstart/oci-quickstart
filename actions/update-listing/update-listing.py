@@ -623,7 +623,7 @@ def submit_listing(config):
         if 'message' in r_json:
             return r_json['message']
         if autoApprove == 'false':
-            return 'this partner has not yet been approved for auto approval. please contact MP admin.'
+            return 'This partner has not been approved for auto approval.  Please contact Marketplace admin.'
         else:
             autoApprove = 'false'
 
@@ -645,7 +645,7 @@ def publish_listing(config):
     if 'message' in r_json:
         return r_json['message']
     else:
-        return 'Failed to auto-publish, please contact MP admin to maunaully approve listing.'
+        return 'Failed to auto-publish.  Please contact Marketplace admin to manually approve listing.'
 
 
 def create_new_listing(config):
@@ -709,7 +709,7 @@ def upload_icon(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    file_name = '/marketplace/icon.png' if os.path.isfile('/marketplace/icon.png') else 'marketplace/icon.png'
+    file_name = 'marketplace/icon.png'
     files = {'image': open(file_name, 'rb')}
     r = requests.post(uri, headers=api_headers, files=files)
     if r.status_code > 299:
