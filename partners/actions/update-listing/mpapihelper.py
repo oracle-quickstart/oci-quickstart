@@ -108,6 +108,7 @@ def find_file(file_name):
         else 'marketplace/{}'.format(file_name) if os.path.isfile('marketplace/{}'.format(file_name)) \
         else '/marketplace/{}'.format(file_name) if os.path.isfile('/marketplace/{}'.format(file_name)) \
         else file_name #return the original file name if not found so the open can throw the exception
+    return file_name
 
 
 def update_version_metadata(config, newVersionId):
