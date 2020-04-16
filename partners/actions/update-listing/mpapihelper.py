@@ -101,6 +101,15 @@ def get_new_versionId(config):
     r_json = json.loads(r.text)
     return r_json["entityId"]
 
+def find_file(file_name):
+    # github actions put files in a chroot jail, so we need to look in root
+    file_name = file_name if os.path.isfile(file_name) \
+        else '/{}'.format(file_name) if os.path.isfile('/{}'.format(file_name)) \
+        else 'marketplace/{}'.format(file_name) if os.path.isfile('marketplace/{}'.format(file_name)) \
+        else '/marketplace/{}'.format(file_name) if os.path.isfile('/marketplace/{}'.format(file_name)) \
+        else file_name #return the original file name if not found so the open can throw the exception
+
+
 def update_version_metadata(config, newVersionId):
     config.action = "get_listingVersion"
     config.listingVersionId = newVersionId
@@ -111,8 +120,7 @@ def update_version_metadata(config, newVersionId):
     body_end = '}'
     body = ""
 
-    # a github action puts things in a chroot jail
-    file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
+    file_name = find_file("metadata.yaml")
     if not os.path.isfile(file_name):
         return f"metadata file metadata.yaml not found. skipping metadata update."
     with open(file_name,  "r") as stream:
@@ -208,8 +216,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
         body = json.dumps(new_version)
     else:
-        # a github action puts things in a chroot jail
-        file_name = "/newImage.json" if os.path.isfile("/newImage.json") else "newImage.json"
+        file_name = find_file("newImage.json")
         with open(file_name, "r") as file_in:
             body = file_in.read()
         body = body.replace("%%NAME%%", config.versionString)
@@ -225,8 +232,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId):
 
-    # a github action puts things in a chroot jail
-    file_name = "/newArtifact.json" if os.path.isfile("/newArtifact.json") else "newArtifact.json"
+    file_name = find_file("newArtifact.json")
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ARTID%%", artifactId)
@@ -291,8 +297,7 @@ def publish_listing(config):
 def create_new_listing(config):
 
     config.action = "get_applications"
-    # a github action puts things in a chroot jail
-    file_name = "/metadata.yaml" if os.path.isfile("/metadata.yaml") else "metadata.yaml"
+    file_name = find_file("metadata.yaml")
     with open(file_name, 'r') as stream:
         new_listing_body = yaml.safe_load(stream)
         del new_listing_body['listingId']
@@ -314,8 +319,8 @@ def create_new_listing(config):
     return r_json["entityId"]
 
 def create_new_package(config, artifactId):
-    # a github action puts things in a chroot jail
-    file_name = "/newPackage.json" if os.path.isfile("/newPackage.json") else "newPackage.json"
+
+    file_name = find_file("newPackage.json")
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ART_ID%%", artifactId)
@@ -338,8 +343,7 @@ def upload_icon(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    # a github action puts things in a chroot jail
-    file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png" if os.path.isfile("icon.png") else "/images/icon.png" if os.path.isfile("/images/icon.png") else "images/icon.png" 
+    file_name = find_file("icon.png")
     files = {'image': open(file_name, 'rb')}
     r = requests.post(uri, headers=api_headers, files=files)
     if r.status_code > 299:

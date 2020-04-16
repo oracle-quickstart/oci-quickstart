@@ -276,10 +276,6 @@ class Partner:
 
 def do_create():
     global config
-    # github actions puts files in a chroot jail
-    file_name = "/icon.png" if os.path.isfile("/icon.png") else "icon.png" if os.path.isfile("icon.png") else "/images/icon.png" if os.path.isfile("/images/icon.png") else "images/icon.png"
-    if not os.path.isfile(file_name):
-        return ("icon.png file not found in workspace directory. exiting.")
     config.listingVersionId = create_new_listing(config)
 
     upload_icon_message = upload_icon(config)
