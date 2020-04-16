@@ -434,12 +434,13 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-    if not os.path.isfile("metadata.yaml"):
+    metadata_file_name = find_file("metadata.yaml")
+    if not os.path.isfile(metadata_file_name):
         config.versionString = "No Version"
         if args.listingVersionId is None:
             config.listingVersionId = 0
     else:
-        with open("metadata.yaml", "r") as stream:
+        with open(metadata_file_name, "r") as stream:
             metadata = yaml.safe_load(stream)
             config.versionString = metadata['versionDetails']['versionNumber']
             if args.listingVersionId is None:
