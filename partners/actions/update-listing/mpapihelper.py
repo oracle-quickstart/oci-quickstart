@@ -3,6 +3,7 @@ import base64
 import yaml
 import json
 import os.path
+import re
 
 action_api_uri_dic = {}
 access_token = ''
@@ -77,6 +78,8 @@ def set_access_token(credsFile):
     api_headers = {'charset': 'UTF-8',
                              'X-Oracle-UserId': creds['user_email'], 'Authorization': f"Bearer {access_token}"}
 
+def sanitize_name(name):
+    return re.sub('[^a-zA-Z0-9_\.\-\+ ]+', '', name)
 
 def do_get_action(config):
     bind_action_dic(config)
@@ -181,7 +184,8 @@ def update_versioned_package_version(config, newPackageVersionId):
         service_type = "OCIOrchestration"
     else:
         service_type = "OCI"
-    body = '{"version": "' + config.versionString + '", "description": "' + config.versionString + '", "serviceType": "' + service_type + '"}'
+    body = '{"version": "' + sanitize_name(config.versionString) + '", "description": "' +\
+           config.versionString + '", "serviceType": "' + service_type + '"}'
     payload = {'json': (None, body)}
     r = requests.put(uri, headers=api_headers, files=payload)
     if r.status_code > 299:
@@ -189,12 +193,13 @@ def update_versioned_package_version(config, newPackageVersionId):
     r_json = json.loads(r.text)
     return r_json["message"]
 
+
 def create_new_stack_artifact(config, fileName):
     config.action = "get_artifacts"
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = '{"name": "' + config.versionString + '", "artifactType": "TERRAFORM_TEMPLATE"}'
+    body = '{"name": "' + sanitize_name(config.versionString) + '", "artifactType": "TERRAFORM_TEMPLATE"}'
     payload = {'json': (None, body)}
     index = fileName.rfind("/")
     name = fileName[index+1:]
@@ -212,7 +217,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
     uri = api_url + apicall
     if old_listing_artifact_version is not None:
         new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
-        new_version['name'] = config.versionString
+        new_version['name'] = sanitize_name(config.versionString)
         new_version['source']['uniqueIdentifier'] = config.imageOcid
         new_version["artifactType"] = "OCI_COMPUTE_IMAGE"
         body = json.dumps(new_version)
@@ -220,7 +225,7 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         file_name = find_file("newImage.json")
         with open(file_name, "r") as file_in:
             body = file_in.read()
-        body = body.replace("%%NAME%%", config.versionString)
+        body = body.replace("%%NAME%%", sanitize_name(config.versionString))
         body = body.replace("%%OCID%%", config.imageOcid)
 
     api_headers['Content-Type'] = 'application/json'
@@ -237,7 +242,7 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId):
     with open(file_name, "r") as file_in:
         body = file_in.read()
     body = body.replace("%%ARTID%%", artifactId)
-    body = body.replace("%%VERS%%", config.versionString)
+    body = body.replace("%%VERS%%", sanitize_name(config.versionString))
 
     if config.imageOcid is not None:
         body = body.replace("Orchestration", "")
