@@ -70,7 +70,7 @@ class ListingMetadata:
     def write_metadata(self, file_name):
 
         if file_name is None:
-            file_name = f"metadata.yaml"
+            file_name = f'metadata.yaml'
 
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
@@ -83,7 +83,7 @@ class ArtifactVersion:
 
     def __str__(self):
         ppstring = ''
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.details, indent=4, sort_keys=False)
         return ppstring
 
@@ -95,19 +95,19 @@ class Artifact:
         global config
         self.resource = resource
         self.versions = []
-        for resourceProperty in resource["properties"]:
-            config.action = "get_artifact"
-            config.artifactId = int(resourceProperty["value"])
+        for resourceProperty in resource['properties']:
+            config.action = 'get_artifact'
+            config.artifactId = int(resourceProperty['value'])
             r = do_get_action(config)
             av = ArtifactVersion(r)
             self.versions.append(av)
 
     def __str__(self):
         ppstring = ''
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.resource, indent=4, sort_keys=False)
         for version in self.versions:
-            ppstring += "\n"
+            ppstring += '\n'
             ppstring += str(version)
         return ppstring
 
@@ -117,17 +117,17 @@ class Package:
 
     def __init__(self, package):
         self.artifacts = []
-        self.package = package["Package"]
-        for resource in self.package["resources"]:
+        self.package = package['Package']
+        for resource in self.package['resources']:
             a = Artifact(resource)
             self.artifacts.append(a)
 
     def __str__(self):
         ppstring = ''
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.package, indent=4, sort_keys=False)
         for artifact in self.artifacts:
-            ppstring += "\n"
+            ppstring += '\n'
             ppstring += str(artifact)
         return ppstring
 
@@ -143,29 +143,29 @@ class ListingVersion:
         self.packages = []
         self.listingVersion = listingVersion
 
-        if "packageVersions" in self.listingVersion:
-            self.packageVersions = self.listingVersion["packageVersions"]
+        if 'packageVersions' in self.listingVersion:
+            self.packageVersions = self.listingVersion['packageVersions']
 
-        config.action = "get_listingVersion"
-        config.listingVersionId = self.listingVersion["listingVersionId"]
+        config.action = 'get_listingVersion'
+        config.listingVersionId = self.listingVersion['listingVersionId']
         self.listingVersionDetails = do_get_action(config)
-        self.listingMetadata = ListingMetadata(f"metadata_{config.listingVersionId}.yaml", self)
-        config.action = "get_application_packages"
+        self.listingMetadata = ListingMetadata(f'metadata_{config.listingVersionId}.yaml', self)
+        config.action = 'get_application_packages'
         packages = do_get_action(config)
 
-        for package in packages["items"]:
-            if not args.includeUnpublished and package["Package"]["status"]["code"] == "unpublished":
+        for package in packages['items']:
+            if not args.includeUnpublished and package['Package']['status']['code'] == 'unpublished':
                 continue
             p = Package(package)
             self.packages.append(p)
 
     def __str__(self):
         ppstring = ''
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
-        ppstring += "\n"
+        ppstring += '\n'
         ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
         for package in self.packages:
             ppstring += str(package)
@@ -177,13 +177,13 @@ class Listing:
     listingId = 0
 
     def __init__(self, listingVersion):
-        self.listingId = listingVersion["listingId"]
+        self.listingId = listingVersion['listingId']
         self.listingVersions = [ListingVersion(listingVersion)]
 
     def __str__(self):
         ppstring = ''
         for listingVersion in self.listingVersions:
-            ppstring += "\n"
+            ppstring += '\n'
             ppstring += str(listingVersion)
         return ppstring
 
@@ -192,9 +192,9 @@ class TermVersion():
 
     def __init__(self, termsId, termVersion):
         global config
-        config.action = "get_terms_version"
+        config.action = 'get_terms_version'
         config.termsId = termsId
-        config.termsVersionId = termVersion["termsVersionId"]
+        config.termsVersionId = termVersion['termsVersionId']
         tv = do_get_action(config)
         self.termVersion = tv
 
@@ -209,8 +209,8 @@ class Terms():
         self.terms = terms
         self.termVersions = []
 
-        for termVersion in terms["termVersions"]:
-            tv = TermVersion(terms["termsId"], termVersion)
+        for termVersion in terms['termVersions']:
+            tv = TermVersion(terms['termsId'], termVersion)
             self.termVersions.append(tv)
 
     def __str__(self):
@@ -228,35 +228,35 @@ class Partner:
     def __init__(self):
         global config
         if config.listingVersionId is None or config.listingVersionId == 0:
-            config.action = "get_listingVersions"
+            config.action = 'get_listingVersions'
         else:
-            config.action = "get_listingVersion"
+            config.action = 'get_listingVersion'
         listingVersions = do_get_action(config)
 
-        if "items" in listingVersions:
-            for item in listingVersions["items"]:
-                if not args.includeUnpublished and item["GenericListing"]["status"]["code"] == "UNPUBLISHED" :
+        if 'items' in listingVersions:
+            for item in listingVersions['items']:
+                if not args.includeUnpublished and item['GenericListing']['status']['code'] == 'UNPUBLISHED' :
                     continue
                 found = False
                 for listing in self.listings:
-                    if listing.listingId == item["GenericListing"]["listingId"]:
-                        listing.listingVersions.append(ListingVersion(item["GenericListing"]))
+                    if listing.listingId == item['GenericListing']['listingId']:
+                        listing.listingVersions.append(ListingVersion(item['GenericListing']))
                         found = True
                         break
 
                 if not found:
-                    listing = Listing(item["GenericListing"])
+                    listing = Listing(item['GenericListing'])
                     self.listings.append(listing)
 
         else:
             listing = Listing(listingVersions)
             self.listings.append(listing)
 
-        config.action = "get_terms"
+        config.action = 'get_terms'
         terms = do_get_action(config)
-        if "items" in terms:
-            for item in terms["items"]:
-                t = Terms(item["terms"])
+        if 'items' in terms:
+            for item in terms['items']:
+                t = Terms(item['terms'])
                 self.terms.append(t)
         else:
             t = Terms(terms)
@@ -264,12 +264,12 @@ class Partner:
 
     def __str__(self):
         ppstring = ''
-        ppstring += (f"The parnter has {len(self.listings)} listing(s)")
-        ppstring += "\n"
+        ppstring += (f'The parnter has {len(self.listings)} listing(s)')
+        ppstring += '\n'
         for listing in self.listings:
             ppstring += str(listing)
-            ppstring += "\n"
-        ppstring += "\n"
+            ppstring += '\n'
+        ppstring += '\n'
         for terms in self.terms:
             ppstring += str(terms)
         return ppstring
@@ -306,7 +306,7 @@ def do_update_listing():
     if config.imageOcid is not None:
         old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
 
-    # TODO: surround this if else with retry loop while status is "in validation"
+    # TODO: surround this if else with retry loop while status is 'in validation'
 
     if config.imageOcid is None:
         # create new artifact for stack listing
@@ -320,7 +320,7 @@ def do_update_listing():
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
-    file_name = f"metadata_{args.listingVersionId}.yaml"
+    file_name = f'metadata_{args.listingVersionId}.yaml'
     config.metadataFile = file_name
     updated_metadata_message = update_version_metadata(config, newVersionId)
 
@@ -347,7 +347,7 @@ def do_update_listing():
 
 
 def lookup_listingVersionId_from_listingId(listingId):
-    config.action = "get_listingVersions"
+    config.action = 'get_listingVersions'
     listingVersions = do_get_action(config)
     for item in listingVersions['items']:
         if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
@@ -357,7 +357,7 @@ def lookup_listingVersionId_from_listingId(listingId):
 
 
 
-if __name__  == "__main__":
+if __name__  == '__main__':
 
     usage_text = '''usage:
     update listing with new terraform template
@@ -434,33 +434,33 @@ if __name__  == "__main__":
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-    metadata_file_name = find_file("metadata.yaml")
+    metadata_file_name = find_file('metadata.yaml')
     if not os.path.isfile(metadata_file_name):
-        config.versionString = "No Version"
+        config.versionString = 'No Version'
         if args.listingVersionId is None:
             config.listingVersionId = 0
     else:
-        with open(metadata_file_name, "r") as stream:
+        with open(metadata_file_name, 'r') as stream:
             metadata = yaml.safe_load(stream)
             config.versionString = metadata['versionDetails']['versionNumber']
             if args.listingVersionId is None:
                 config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
 
-    if "get" in args.action:
+    if 'get' in args.action:
         r_json = do_get_action(config)
         print(json.dumps(r_json, indent=4, sort_keys=True))
 
-    if "create" in args.action:
+    if 'create' in args.action:
         print(do_create())
 
-    if "build" in args.action:
+    if 'build' in args.action:
         partner = Partner()
         print(partner)
 
-    if "update_listing" in args.action:
+    if 'update_listing' in args.action:
         print(do_update_listing())
 
-    if "dump_metadata" in args.action:
+    if 'dump_metadata' in args.action:
         partner = Partner()
         lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
-        lmd.write_metadata(f"metadata.yaml")
+        lmd.write_metadata(f'metadata.yaml')
