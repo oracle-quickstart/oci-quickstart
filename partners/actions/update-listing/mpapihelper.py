@@ -171,6 +171,7 @@ def get_new_packageVersionId(config, newVersionId, packageId):
     return r_json['entityId']
 
 def update_versioned_package_version(config, newPackageVersionId):
+    time_stamp = str(time.ctime()).replace(':','')
     config.action = 'get_application_package'
     config.packageVersionId = newPackageVersionId
     bind_action_dic(config)
@@ -181,7 +182,7 @@ def update_versioned_package_version(config, newPackageVersionId):
     else:
         service_type = 'OCI'
     body = {}
-    body['version'] = sanitize_name(config.versionString)
+    body['version'] = sanitize_name(config.versionString) + ' ' + time_stamp
     body['description'] = config.versionString
     body['serviceType'] = service_type
     payload = {'json': (None, json.dumps(body))}
