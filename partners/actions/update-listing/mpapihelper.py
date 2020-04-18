@@ -302,15 +302,15 @@ def publish_listing(config):
     body = {}
     body['action'] = 'publish'
     api_headers['Content-Type'] = 'application/json'
-    #r = requests.patch(uri, headers=api_headers, data=json.dumps(body))
+    r = requests.patch(uri, headers=api_headers, data=json.dumps(body))
     del api_headers['Content-Type']
-    #if r.status_code > 299:
-    #    print(r.text)
-    #r_json = json.loads(r.text)
-    #if 'message' in r_json:
-    #    return r_json['message']
-    #else:
-    #    return 'Failed to auto-publish, please contact MP admin to maunaully approve listing.'
+    if r.status_code > 299:
+        print(r.text)
+    r_json = json.loads(r.text)
+    if 'message' in r_json:
+        return r_json['message']
+    else:
+        return 'Failed to auto-publish, please contact MP admin to maunaully approve listing.'
 
 def create_new_listing(config):
 
