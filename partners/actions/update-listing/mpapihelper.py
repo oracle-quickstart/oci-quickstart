@@ -1,9 +1,11 @@
+import time
 import requests
 import base64
 import yaml
 import json
 import os.path
 import re
+
 
 action_api_uri_dic = {}
 access_token = ''
@@ -191,12 +193,13 @@ def update_versioned_package_version(config, newPackageVersionId):
 
 
 def create_new_stack_artifact(config, fileName):
+    time_stamp = str(time.ctime()).replace(':','')
     config.action = 'get_artifacts'
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body={}
-    body['name'] = sanitize_name(config.versionString)
+    body['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
     body['artifactType'] = 'TERRAFORM_TEMPLATE'
     payload = {'json': (None, json.dumps(body))}
     index = fileName.rfind('/')
@@ -209,18 +212,19 @@ def create_new_stack_artifact(config, fileName):
     return r_json['entityId']
 
 def create_new_image_artifact(config, old_listing_artifact_version):
+    time_stamp = str(time.ctime()).replace(':', '')
     config.action = 'get_artifacts'
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     if old_listing_artifact_version is not None:
         new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
-        new_version['name'] = sanitize_name(config.versionString)
+        new_version['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
         new_version['source']['uniqueIdentifier'] = config.imageOcid
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
     else:
         new_version = {}
-        new_version['name'] = sanitize_name(config.versionString)
+        new_version['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
         new_version['source'] = {}
         new_version['source']['regionCode'] = 'us-ashburn-1'
