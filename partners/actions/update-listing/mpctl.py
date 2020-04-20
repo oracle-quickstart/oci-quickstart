@@ -55,6 +55,7 @@ class ListingMetadata:
         if lv is not None:
             lvd = lv.listingVersionDetails
             self.api_metadata['versionDetails'] = {}
+            self.api_metadata['listingId'] = args.listingId
             self.api_metadata['versionDetails']['versionNumber'] = lvd['versionDetails']['versionNumber'] \
                 if 'versionDetails' in lvd and 'versionNumber' in lvd['versionDetails'] else ''
             self.api_metadata['versionDetails']['releaseDate'] = lvd['versionDetails']['releaseDate'] \
@@ -464,7 +465,10 @@ if __name__ == '__main__':
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
 
-    config.listingVersionId = find_listing_versionid()
+    if args.listingVersionId is None:
+        config.listingVersionId = find_listing_versionid()
+    else:
+        config.listingVersionId = args.listingVersionId
 
     if 'get' in args.action:
         r_json = do_get_action(config)
