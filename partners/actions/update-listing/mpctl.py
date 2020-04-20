@@ -38,8 +38,8 @@ from mpapihelper import *
 
 config = None
 
-class ListingMetadata:
 
+class ListingMetadata:
     git_metadata = {}
     api_metadata = {}
 
@@ -75,6 +75,7 @@ class ListingMetadata:
         with open(file_name, 'w+') as stream:
             yaml.safe_dump(self.api_metadata, stream)
 
+
 class ArtifactVersion:
     details = []
 
@@ -86,6 +87,7 @@ class ArtifactVersion:
         ppstring += '\n'
         ppstring += json.dumps(self.details, indent=4, sort_keys=False)
         return ppstring
+
 
 class Artifact:
     versions = []
@@ -111,6 +113,7 @@ class Artifact:
             ppstring += str(version)
         return ppstring
 
+
 class Package:
     package = []
     artifacts = []
@@ -131,6 +134,7 @@ class Package:
             ppstring += str(artifact)
         return ppstring
 
+
 class ListingVersion:
     packageVersions = []
     listingVersion = ''
@@ -149,7 +153,7 @@ class ListingVersion:
         config.action = 'get_listingVersion'
         config.listingVersionId = self.listingVersion['listingVersionId']
         self.listingVersionDetails = do_get_action(config)
-        self.listingMetadata = ListingMetadata(f'metadata_{config.listingVersionId}.yaml', self)
+        self.listingMetadata = ListingMetadata(find_file('metadata.yaml'), self)
         config.action = 'get_application_packages'
         packages = do_get_action(config)
 
@@ -172,6 +176,7 @@ class ListingVersion:
             pass
         return ppstring
 
+
 class Listing:
     listingVersions = []
     listingId = 0
@@ -187,6 +192,7 @@ class Listing:
             ppstring += str(listingVersion)
         return ppstring
 
+
 class TermVersion():
     termVersion = []
 
@@ -200,6 +206,7 @@ class TermVersion():
 
     def __str__(self):
         return json.dumps(self.termVersion, indent=4, sort_keys=False)
+
 
 class Terms():
     terms = []
@@ -220,14 +227,14 @@ class Terms():
             ppstring += str(termVersion)
         return ppstring
 
-class Partner:
 
+class Partner:
     listings = []
     terms = []
 
     def __init__(self):
         global config
-        if config.listingVersionId is None or config.listingVersionId == 0:
+        if args.all or config.listingVersionId is None or config.listingVersionId == 0:
             config.action = 'get_listingVersions'
         else:
             config.action = 'get_listingVersion'
@@ -235,7 +242,7 @@ class Partner:
 
         if 'items' in listingVersions:
             for item in listingVersions['items']:
-                if not args.includeUnpublished and item['GenericListing']['status']['code'] == 'UNPUBLISHED' :
+                if not args.includeUnpublished and item['GenericListing']['status']['code'] == 'UNPUBLISHED':
                     continue
                 found = False
                 for listing in self.listings:
@@ -274,6 +281,7 @@ class Partner:
             ppstring += str(terms)
         return ppstring
 
+
 def do_create():
     global config
     config.listingVersionId = create_new_listing(config)
@@ -288,23 +296,24 @@ def do_create():
         # create new artifact for iamge listing
         artifactId = create_new_image_artifact(config, None)
 
-
     newPackageId = create_new_package(config, artifactId)
 
     # submit the new version of the listing for approval
     message = submit_listing(config)
 
     # TODO: possible also publish new listings
-    #message = publish_listing(config)
+    # message = publish_listing(config)
 
     return message
+
 
 def do_update_listing():
     global config
     partner = Partner()
 
     if config.imageOcid is not None:
-        old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[0].details
+        old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[
+            0].details
 
     # TODO: surround this if else with retry loop while status is 'in validation'
 
@@ -315,13 +324,9 @@ def do_update_listing():
         # create new artifact for iamge listing
         artifactId = create_new_image_artifact(config, old_listing_artifact_version)
 
-
-
     # create a new version for the application listing
     newVersionId = get_new_versionId(config)
 
-    file_name = f'metadata_{args.listingVersionId}.yaml'
-    config.metadataFile = file_name
     updated_metadata_message = update_version_metadata(config, newVersionId)
 
     # get the package version id needed for package version creation
@@ -332,7 +337,6 @@ def do_update_listing():
 
     # update versioned package details
     message = update_versioned_package_version(config, newPackageVersionId)
-    
 
     # update versioned package details - associate newly created artifact
     message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
@@ -355,9 +359,30 @@ def lookup_listingVersionId_from_listingId(listingId):
     return '0'
 
 
+def find_listing_versionid(): #TODO: this shouldn't have the side effect of setting the version string
+
+    listingVersionId = None
+    metadata_file_name = find_file('metadata.yaml')
+
+    if not os.path.isfile(metadata_file_name):
+        config.versionString = 'No Version'
+        if args.listingVersionId is None:
+            listingVersionId = 0
+            if args.listingId is not None:
+                listingVersionId = lookup_listingVersionId_from_listingId(args.listingId)
+    else:
+        with open(metadata_file_name, 'r') as stream:
+            metadata = yaml.safe_load(stream)
+            config.versionString = metadata['versionDetails']['versionNumber']
+            if args.listingVersionId is None:
+                if args.listingId is None:
+                    listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+                else:
+                    listingVersionId = lookup_listingVersionId_from_listingId(args.listingId)
+    return listingVersionId
 
 
-if __name__  == '__main__':
+if __name__ == '__main__':
 
     usage_text = '''usage:
     update listing with new terraform template
@@ -396,8 +421,10 @@ if __name__  == '__main__':
                         help='the action to perform')
     parser.add_argument('-includeUnpublished', action='store_true',
                         help='include unpublished versions when building tree')
+    parser.add_argument('-listingId', type=int,
+                        help='the listing to act on')
     parser.add_argument('-listingVersionId', type=int,
-                        help='the listing version to act on')
+                        help='the listing version to act on [optional]. Can be inferred from listingId')
     parser.add_argument('-packageVersionId', type=int,
                         help='the package version to act on')
     parser.add_argument('-termsId', type=int,
@@ -409,9 +436,11 @@ if __name__  == '__main__':
     parser.add_argument('-fileName',
                         help='the name of the TF file')
     parser.add_argument('-imageOcid',
-                       help='the ocid of the update image')
+                        help='the ocid of the update image')
     parser.add_argument('-credsFile',
                         help='the path to the creds file')
+    parser.add_argument('-all', action='store_true',
+                        help='get all listings even if listing id is known')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -434,17 +463,8 @@ if __name__  == '__main__':
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
-    metadata_file_name = find_file('metadata.yaml')
-    if not os.path.isfile(metadata_file_name):
-        config.versionString = 'No Version'
-        if args.listingVersionId is None:
-            config.listingVersionId = 0
-    else:
-        with open(metadata_file_name, 'r') as stream:
-            metadata = yaml.safe_load(stream)
-            config.versionString = metadata['versionDetails']['versionNumber']
-            if args.listingVersionId is None:
-                config.listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+
+    config.listingVersionId = find_listing_versionid()
 
     if 'get' in args.action:
         r_json = do_get_action(config)

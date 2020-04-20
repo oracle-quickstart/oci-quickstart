@@ -26,7 +26,6 @@ class Config:
     access_token = None
     imageOcid = None
     credsFile = None
-    metadataFile = None
     versionString = None
 
     def __init__(self, credsFile):
