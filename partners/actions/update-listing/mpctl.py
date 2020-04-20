@@ -23,17 +23,26 @@ from mpapihelper import *
 #   get one listing
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
 #
+#   get the published version of one listing
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingId <listingId>
+#
 #   get all listings
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
 #
 #   build one listing tree
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
 #
+#   build one listing tree of the published version
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingId <listingId>
+#
 #   build all listings tree for partner
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
 #
 #   dump metadata file for a listing
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
+#
+#   dump metadata file for a listing's published version
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingId <listingId>
 #######################################################################################################################
 
 config = None
@@ -386,32 +395,43 @@ def find_listing_versionid(): #TODO: this shouldn't have the side effect of sett
 if __name__ == '__main__':
 
     usage_text = '''usage:
-    update listing with new terraform template
-       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -fileName <fileName of ORM zip>
 
-   update listing with new image
-       python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -imageOcid <imageOcid>
+update listing with new terraform template
+   python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -fileName <fileName of ORM zip>
 
-   create new terraform listing
-       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -fileName <fileName of ORM zip>
+update listing with new image
+   python3 mpctl.py -credsFile <path to creds yaml file> -action update_listing -imageOcid <imageOcid>
 
-   create new image listing
-       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
+create new terraform listing
+   python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -fileName <fileName of ORM zip>
 
-   get one listing
-       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
+create new image listing
+   python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
 
-   get all listings
-       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
+get one listing
+   python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
 
-   build one listing tree
-       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
+get the published version of one listing
+   python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingId <listingId>
 
-   build all listings tree for partner
-       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
-       
-   dump metadata file for a listing
-       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
+get all listings
+   python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
+
+build one listing tree
+   python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
+
+build one listing tree of the published version 
+   python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingId <listingId>
+
+build all listings tree for partner
+   python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings [-includeUnpublished]
+
+dump metadata file for a listing
+   python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingVersionId <listingVersionId>
+
+dump metadata file for a listing's published version
+   python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingId <listingId>
+
    '''
 
     parser = argparse.ArgumentParser(prog='mpctl',
