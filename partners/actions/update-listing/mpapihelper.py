@@ -6,7 +6,6 @@ import json
 import os.path
 import re
 
-
 action_api_uri_dic = {}
 access_token = ''
 creds = {}
@@ -31,6 +30,73 @@ class Config:
     def __init__(self, credsFile):
         if self.access_token is None:
             set_access_token(credsFile)
+
+class Request:
+    class __Request:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def __str__(self):
+            return repr(self)
+
+    instance = None
+
+    def  __init__(self, **kwargs):
+        if not Request.instance:
+            Request.instance = Request.__Request(**kwargs)
+        else:
+            Request.instance.kwargs = {**Request.instance.kwargs, **kwargs}
+
+    def get(self):
+        r = requests.get(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'])
+        if r.status_code > 299:
+            print(r.text)
+        return json.loads(r.text)
+
+    def post(self, files=None, data=None):
+
+        #### neither files nor data
+        if files is None and data is None:
+            r = requests.post(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'])
+
+        #### data but no files
+        elif data is not None and files is None:
+            Request.instance.kwargs['api_headers']['Content-Type'] = 'application/json'
+            r = requests.post(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'], data = data)
+            del Request.instance.kwargs['api_headers']['Content-Type']
+
+        #### files and data
+        elif data is not None and files is not None:
+            r = requests.post(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'],
+                              files=files, data=data)
+
+        #### only files
+        else:
+            r = requests.post(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'],
+                              files=files)
+
+        if r.status_code > 299:
+            print(r.text)
+        return json.loads(r.text)
+
+    def patch(self, data = None, is_json = False):
+        if data is None:
+            r = requests.patch(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'])
+        else:
+            if is_json:
+                Request.instance.kwargs['api_headers']['Content-Type'] = 'application/json'
+            r = requests.patch(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'], data=data)
+            del Request.instance.kwargs['api_headers']['Content-Type']
+
+        if r.status_code > 299:
+            print(r.text)
+        return json.loads(r.text)
+
+    def put(self, data):
+        r = requests.put(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'], files=data)
+        if r.status_code > 299:
+            print(r.text)
+        return json.loads(r.text)
 
 def bind_action_dic(config):
     global action_api_uri_dic
@@ -82,6 +148,8 @@ def set_access_token(credsFile):
     api_headers['X-Oracle-UserId'] = creds['user_email']
     api_headers['Authorization'] = f'Bearer {access_token}'
 
+    request = Request(api_headers = api_headers)
+
 def sanitize_name(name):
     return re.sub('[^a-zA-Z0-9_\.\-\+ ]+', '', name)
 
@@ -98,24 +166,18 @@ def do_get_action(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.get(uri, headers=api_headers)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json
+    request = Request(uri = uri)
+    result = request.get()
+    return result
 
 def get_new_versionId(config):
     config.action = 'create_new_version'
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.post(uri, headers=api_headers)
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+    request = Request(uri = uri)
+    result = request.post()
+    return result['entityId'] if 'entityId' in result else result
 
 def update_version_metadata(config, newVersionId):
     config.action = 'get_listingVersion'
@@ -137,16 +199,12 @@ def update_version_metadata(config, newVersionId):
 
     body = json.dumps(metadata)
 
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.patch(uri, headers=api_headers, data=body)
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    if 'message' in r_json:
-        return r_json['message']
+    request = Request(uri = uri)
+    result = request.patch(body, True)
+    if 'message' in result:
+        return result['message']
     else:
-        return r.text
+        return result.text if 'text' in result else result
 
 def get_packageId(config, newVersionId):
     config.action = 'get_application_packages'
@@ -161,13 +219,11 @@ def get_new_packageVersionId(config, newVersionId, packageId):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.patch(uri, headers=api_headers)
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+
+    request = Request(uri=uri)
+    result = request.patch()
+
+    return result['entityId'] if 'entityId' in result else result
 
 def update_versioned_package_version(config, newPackageVersionId):
     time_stamp = str(time.ctime()).replace(':','')
@@ -185,12 +241,13 @@ def update_versioned_package_version(config, newPackageVersionId):
     body['description'] = config.versionString
     body['serviceType'] = service_type
     payload = {'json': (None, json.dumps(body))}
-    r = requests.put(uri, headers=api_headers, files=payload)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['message']
 
+    request = Request(uri=uri)
+    result = request.put(payload)
+    if 'message' in result:
+        return result['message']
+    else:
+        return result.text if 'text' in result else result
 
 def create_new_stack_artifact(config, fileName):
     time_stamp = str(time.ctime()).replace(':','')
@@ -205,11 +262,9 @@ def create_new_stack_artifact(config, fileName):
     index = fileName.rfind('/')
     name = fileName[index+1:]
     files = {'file': (name, open(fileName, 'rb'))}
-    r = requests.post(uri, headers=api_headers, files=files, data=payload)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+    request = Request(uri = uri)
+    result = request.post(files, payload)
+    return result['entityId'] if 'entityId' in result else result
 
 def create_new_image_artifact(config, old_listing_artifact_version):
     time_stamp = str(time.ctime()).replace(':', '')
@@ -235,13 +290,10 @@ def create_new_image_artifact(config, old_listing_artifact_version):
         new_version['artifactProperties'][1]['artifactTypePropertyName'] = 'ociTenancyID'
         new_version['artifactProperties'][1]['value']  = picTenancyId
 
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.post(uri, headers=api_headers, data=json.dumps(new_version))
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+    request = Request(uri = uri)
+    data = json.dumps(new_version)
+    result = request.post(None, data)
+    return result['entityId'] if 'entityId' in result else result
 
 def associate_artifact_with_package(config, artifactId, newPackageVersionId):
 
@@ -262,11 +314,12 @@ def associate_artifact_with_package(config, artifactId, newPackageVersionId):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    r = requests.put(uri, headers=api_headers, files=payload)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['message']
+    request = Request(uri = uri)
+    result = request.put(payload)
+    if 'message' in result:
+        return result['message']
+    else:
+        return result.text if 'text' in result else result
 
 def submit_listing(config):
     autoApprove = 'true'
@@ -279,20 +332,15 @@ def submit_listing(config):
         body['action'] = 'submit'
         body['note'] = 'submitting new version'
         body['autoApprove'] = autoApprove
-        api_headers['Content-Type'] = 'application/json'
-        r = requests.patch(uri, headers=api_headers, data=json.dumps(body))
-        del api_headers['Content-Type']
-        if r.status_code > 299:
-            print(r.text)
-        r_json = json.loads(r.text)
-        if 'message' in r_json:
-            return r_json['message']
+        data = json.dumps(body)
+        request = Request(uri = uri)
+        result = request.patch(data, True)
+        if 'message' in result:
+            return result['message']
         if autoApprove == 'false':
             return 'this partner has not yet been approved for auto approval. please contact MP admin.'
         else:
             autoApprove = 'false'
-
-
 
 def publish_listing(config):
     config.action = 'get_listingVersion'
@@ -301,19 +349,15 @@ def publish_listing(config):
     uri = api_url + apicall
     body = {}
     body['action'] = 'publish'
-    api_headers['Content-Type'] = 'application/json'
-    r = requests.patch(uri, headers=api_headers, data=json.dumps(body))
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    if 'message' in r_json:
-        return r_json['message']
+    data = json.dumps(body)
+    request = Request(uri=uri)
+    result = request.patch(data, True)
+    if 'message' in result:
+        return result['message']
     else:
         return 'Failed to auto-publish, please contact MP admin to maunaully approve listing.'
 
 def create_new_listing(config):
-
     config.action = 'get_applications'
     file_name = find_file('metadata.yaml')
     with open(file_name, 'r') as stream:
@@ -327,14 +371,10 @@ def create_new_listing(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    api_headers['Content-Type'] = 'application/json'
     body = json.dumps(new_version)
-    r = requests.post(uri, headers=api_headers, data=body)
-    del api_headers['Content-Type']
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+    request = Request(uri = uri)
+    result = request.post(None, body)
+    return result['entityId'] if 'entityId' in result else result
 
 def create_new_package(config, artifactId):
 
@@ -354,11 +394,12 @@ def create_new_package(config, artifactId):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     payload = {'json': (None, json.dumps(body))}
-    r = requests.post(uri, headers=api_headers, files=payload)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['message']
+    request = Request(uri = uri)
+    result = request.post(payload)
+    if 'message' in result:
+        return result['message']
+    else:
+        return result.text if 'text' in result else result
 
 def upload_icon(config):
     config.action = 'upload_icon'
@@ -367,9 +408,8 @@ def upload_icon(config):
     uri = api_url + apicall
     file_name = find_file('icon.png')
     files = {'image': open(file_name, 'rb')}
-    r = requests.post(uri, headers=api_headers, files=files)
-    if r.status_code > 299:
-        print(r.text)
-    r_json = json.loads(r.text)
-    return r_json['entityId']
+    request = Request(uri = uri)
+    result = request.post(files)
+    return result['entityId'] if 'entityId' in result else result
+
 
