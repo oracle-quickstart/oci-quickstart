@@ -1,6 +1,4 @@
 # Marketplace Stack Schema
-
-## Introduction
 Oracle Cloud Infrastructure Marketplace is an online store that offers applications specifically for customers of Oracle Cloud Infrastructure. In the Oracle Cloud Infrastructure Marketplace catalog, customers can find and launch Images and Stacks from Oracle or trusted partners. These Marketplace Images or Stacks are deployed into the customer's tenancy.
 
 Marketplace Images are templates of virtual hard drives that determine the operating system and software to run on an instance. Publishers will publish a [Custom Image](https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/managingcustomimages.htm) as an Artifact in the [Marketplace Partner Portal](https://partner.cloudmarketplace.oracle.com/partner/index.html).
@@ -14,9 +12,8 @@ Terraform variables are defined as environment variables, command line arguments
 In order to enable any user - technical or non-technical to launch a Marketplace Stack directly from the OCI console without depending on any CLI,  Marketplace/ORM provided a unique feature to enable publishers to create a custom UI for their Stacks where they can create a Form based on the same look and feel of OCI console and also can link the OCI created resources with the Marketplace listing that originated it.
 
 ## Marketplace Stack Requirements
-
 | #    | Description |
-| :--- |    :----    |
+| :--- | :---------- |
 | 1    | Schema file is baed on [YAML](https://yaml.org/)  |
 | 2    | All variables declared in the schema file MUST exist in the Terraform configuration.   |
 | 3    | The `tenancy_ocid` and `region` variables must be declared as part of the schema, but placed in a hidden `variableGroups` section as their values are set automatically by ORM based on customer selections in the OCI console. |
@@ -24,20 +21,20 @@ In order to enable any user - technical or non-technical to launch a Marketplace
 
 ## YAML Schema Building Blocks
 
-### 1.Marketplace Application Information tab
+### 1. Marketplace Application Information Tab
 
 This block contains general information related to the listing that is displayed in the Application Information tab in the OCI Console, e.g. application description, logo/icon URL, listing-id, content-language and  some boilerplate code related to the schema version.
 
 #### Fields
-| Name   | Description |
-| :--- |    :----    |
-| title    | Title of the listing displayed in the OCI console - Application Information tab |
-| description    | Sub Title shown in Application Information tab. |
-| schemaVersion  | YAML Schema version. Fixed Value = `1.1.0` |
-| version    | Marktetplace API Version. Fixed Value = `20190404` |
-| logoUrl    | URL of Logo Icon used on Application Information tab. Logo must be 130x130 pixels. |
-| source    | Used in Application Information tab to Hyperlink Title and Logo to the Marketplace Listing. Also used to link to Listing Usage section for "View Instructions".|
-| locale    | Listing Locale, e.g. `en` for English |
+| Name | Description |
+| :--- | :---------- |
+| title | Title of the listing displayed in the OCI console - Application Information tab |
+| description | Sub Title shown in Application Information tab. |
+| schemaVersion | YAML Schema version. Fixed Value = `1.1.0` |
+| version | Marketplace API Version. Fixed Value = `20190404` |
+| logoUrl | URL of Logo Icon used on Application Information tab. Logo must be 130x130 pixels. |
+| source | Used in Application Information tab to Hyperlink Title and Logo to the Marketplace Listing. Also used to link to Listing Usage section for "View Instructions".|
+| locale | Listing Locale, e.g. `en` for English |
 
 #### Sample Code
 ```yaml
@@ -55,13 +52,13 @@ source:
 locale: "en"
 ```
 
-### 2.VariableGroups
+### 2. variableGroups
 
 #### Fields
 
-| Name   | Description |
-| :--- |    :----    |
-| variableGroups    | Top level identifier of `variableGroups` section |
+| Name | Description |
+| :--- | :---------- |
+| variableGroups | Top level identifier of `variableGroups` section |
 | title | Title of the Group |
 | variables | list of variables that are presented/hidden in this group |
 | visible | set the visibility of variableGroups block - use a boolean or an expression|
@@ -90,19 +87,19 @@ variableGroups:
             - false
 ```
 
-### 3.Terraform Variables
+### 3. Terraform Variables
 
 Use this section to declare all Terraform Input variables that are presented in your Template. All variables in the Terraform Root Module should be declared.
 
 #### Fields
 
- Name   | Description |
-| :--- |    :----    |
-| variables    | Top level identifier of `variables` section |
+| Name | Description |
+| :--- | :---------- |
+| variables | Top level identifier of `variables` section |
 | `<variable_name>` | The name of the input variable declared in the Terraform template. |
 | type | Definition of the variable type supported by the schema. This is not a Terraform variable type as the OCI Marketplace schema support dynamic types that will automatically lookup for OCI resource types. See Dynamic types.|
-| minLenght | Minimum Lenght of the Variable |
-| maxLenght | Maximum Lenght of the Variable |
+| minLength | Minimum Length of the variable |
+| maxLength | Maximum Length of the variable |
 | pattern | Regex pattern |
 | title | Label of the variable |
 | description | Tooltip with the description of the variable |
@@ -115,33 +112,30 @@ Use this section to declare all Terraform Input variables that are presented in 
 Variable Types in the Schema definition are statically or dynamically resolved based on customer's tenancy and OCI Console navigation.
 
 | Static Types | Description |
-| :--- |    :----    |
-| array    | List of values |
-| boolean    | `true` or `false` |
-| enum    | List of static sorted values |
-| integer    | Integer  |
-| number    | Number |
-| string    | Text |
-| password    | Hidden Text |
-| datetime    | Current Date Time |
-
+| :----------- | :---------- |
+| array | List of values |
+| boolean | `true` or `false` |
+| enum | List of static sorted values |
+| integer | Integer  |
+| number | Number |
+| string | Text |
+| password | Hidden Text |
+| datetime | Current Date Time |
 
 | Dynamic Types | Description | Depends on | Filter |
-| :--- |    :----    | :---- |  :---- |
-| oci:identity:region:name    | OCI Region | | |
-| oci:identity:compartment:id    | Compartment Id | | |
-| oci:core:image:id    | List of values | | |
-| oci:core:instanceshape:name    | List of Compute Shapes | compartmentId  | imageId |
-| oci:core:vcn:id    | List of VCNs in the existing region  | compartmentId | |
-| oci:core:subnet:id    | List of Subnets | vcnId compartmentId| hidePublicSubnet hidePrivateSubnet hideRegionalSubnet hideAdSubnet   |
-| oci:identity:availabilitydomain:name    | Region Availability Domain | compartmentId | |
-| oci:identity:faultdomain:name    | AD Fault Domains | compartmentId availabilityDomainName | |
-| oci:database:dbsystem:id    | Oracle DB Systems (Exadata, Bare Metal and VM) | | |
-| oci:database:dbhome:id    | Oracle DB Systems Home Folder | compartmentId dbSystemId | |
-| oci:database:database:id    | Oracle DB ID | | |
-| oci:database:autonomousdatabase:id    | Oracle Autonomous Database ID  | | |
-
-
+| :------------ | :---------- | :--------- | :----- |
+| oci:identity:region:name | OCI Region | | |
+| oci:identity:compartment:id | Compartment Id | | |
+| oci:core:image:id | List of values | | |
+| oci:core:instanceshape:name | List of Compute Shapes | compartmentId  | imageId |
+| oci:core:vcn:id | List of VCNs in the existing region  | compartmentId | |
+| oci:core:subnet:id | List of Subnets | vcnId compartmentId | hidePublicSubnet hidePrivateSubnet hideRegionalSubnet hideAdSubnet |
+| oci:identity:availabilitydomain:name | Region Availability Domain | compartmentId | |
+| oci:identity:faultdomain:name | AD Fault Domains | compartmentId availabilityDomainName | |
+| oci:database:dbsystem:id | Oracle DB Systems (Exadata, Bare Metal and VM) | | |
+| oci:database:dbhome:id | Oracle DB Systems Home Folder | compartmentId dbSystemId | |
+| oci:database:database:id | Oracle DB ID | | |
+| oci:database:autonomousdatabase:id | Oracle Autonomous Database ID  | | |
 
 #### Sample Code
 
@@ -159,7 +153,7 @@ variables:
     description: Enter your username
     default: admin
     required: true
- 
+
 myVcn:
     type: oci:core:vcn:id
     dependsOn:
@@ -173,18 +167,18 @@ myVcn:
             - true
           - not:
             - false
- 
+
   subnetCompartment:
     type: oci:identity:compartment:id
     visible: ${useExistingVcn}
- 
+
   mySubnet:
     type: oci:core:subnet:id
     dependsOn:
       compartmentId: ${subnetCompartment}
       vcnId: ${myVcn}
     visible: ${useExistingVcn}
- 
+
   mySubnetWithFilter:
     type: oci:core:subnet:id
     dependsOn:
@@ -197,19 +191,18 @@ myVcn:
     visible: ${useExistingVcn}
 ```
 
-### 4.Terraform Outputs
+### 4. Terraform Outputs
 
 #### Fields
 
- Name   | Description |
-| :--- |    :----    |
-| outputs    | Top level identifier of Terraform `outputs` section |
-| `<output_variable_name>`    | The name of the output variable declared in the Terraform template.|
-| type    | Output Variable type: `link`, `csv`, `ocid` |
+| Name | Description |
+| :--- | :---------- |
+| outputs | Top level identifier of Terraform `outputs` section |
+| `<output_variable_name>` | The name of the output variable declared in the Terraform template.|
+| type | Output Variable type: `link`, `csv`, `ocid` |
 | title | Label of the Output variable |
 | displayText | Tooltip with the description of the variable |
-| visible    | set the visibility of a variable - use a boolean or an expression |
-
+| visible | set the visibility of a variable - use a boolean or an expression |
 
 #### Sample Code
 
@@ -220,46 +213,45 @@ outputs:
     title: Control Center
     displayText: Control Center
     visible: false
- 
- 
+
+
   schemaRegistryUrl:
     type: link
     title: Schema Registry
     displayText: Schema Registry
- 
+
   schemaRegistryPublicIps:
     type: csv
     title: Public IPs
- 
+
   schameRegistryLoadBalancer:
     type: ocid
     title: Load Balancer
-   
+
   brokerPublicIps:
     type: csv
-     
+
   connectUrl:
     type: link
     title: Connect
     displayText: Connect
- 
+
   connectPublicIps:
     type: csv
     title: Public IPs
-   
+
   restUrl:
     type: link
     title: Rest API
 ```
 
-### 5.Primary Output Button
+### 5. Primary Output Button
 
 #### Fields
 
- Name   | Description |
-| :--- |    :----    |
-| primaryOutputButton    | Output Variable linked to the Marketplace Action Button in the Instance Tab (Compute UI) |
-
+| Name | Description |
+| :--- | :----------|
+| primaryOutputButton | Output Variable linked to the Marketplace Action Button in the Instance Tab (Compute UI) |
 
 #### Sample Code
 
@@ -274,11 +266,11 @@ Use this section to declare all Terraform Output variables that are presented in
 
 #### Fields
 
- Name   | Description |
-| :--- |    :----    |
-| outputGroups    | Top level identifier of `outputGroups` section |
-| title    | Title of the Output Variables Group  |
-| outputs    | Terraform output variables |
+| Name | Description |
+| :--- | :---------- |
+| outputGroups | Top level identifier of `outputGroups` section |
+| title | Title of the Output Variables Group  |
+| outputs | Terraform output variables |
 | `<output_variable>` | Name of the Output Variable |
 
 #### Sample Code
@@ -291,8 +283,8 @@ outputGroups:
       - ${schemaRegistryPublicIps}
       - ${schemaRegistryInstances}
       - ${schemaRegistryLoadBalancer}
- 
- 
+
+
   - title: Broker / Connect
     outputs:
       - ${brokerPublicIps}
