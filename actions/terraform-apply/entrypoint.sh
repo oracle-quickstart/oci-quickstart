@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 apt-get update
 apt install -y build-essential unzip go-dep

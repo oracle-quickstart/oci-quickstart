@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
