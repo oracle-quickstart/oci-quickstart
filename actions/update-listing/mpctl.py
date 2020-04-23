@@ -463,6 +463,8 @@ dump metadata file for a listing's published version
                         help='the path to the creds file')
     parser.add_argument('-all', action='store_true',
                         help='get all listings even if listing id is known')
+    parser.add_argument('-commitHash',
+                        help='a string to append to package version')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -485,6 +487,8 @@ dump metadata file for a listing's published version
         config.termsVersionId = args.termsVersionId
     if args.imageOcid is not None:
         config.imageOcid = args.imageOcid
+    if args.commitHash is not None:
+        config.commitHash = args.commitHash
 
     if args.listingVersionId is None:
         config.listingVersionId = find_listing_versionid()

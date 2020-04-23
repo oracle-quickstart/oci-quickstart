@@ -27,6 +27,7 @@ class Config:
     imageOcid = None
     credsFile = None
     versionString = None
+    commitHash = None
 
     def __init__(self, credsFile):
         if self.access_token is None:
@@ -274,7 +275,8 @@ def create_new_stack_artifact(config, fileName):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body={}
-    body['name'] = sanitize_name(config.versionString) + ' ' + get_time_stamp()
+    body['name'] = config.commit_hash if config.commitHash is not None \
+        else sanitize_name(config.versionString) + ' ' + get_time_stamp()
     body['artifactType'] = 'TERRAFORM_TEMPLATE'
     payload = {'json': (None, json.dumps(body))}
     index = fileName.rfind('/')
