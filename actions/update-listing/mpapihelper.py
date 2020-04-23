@@ -1,4 +1,5 @@
-import time
+from time import gmtime, strftime
+import datetime
 import requests
 import base64
 import yaml
@@ -162,6 +163,9 @@ def find_file(file_name):
         else file_name #return the original file name if not found so the open can throw the exception
     return file_name
 
+def get_time_stamp():
+    return strftime("%Y%m%d%H%M", gmtime())
+
 def do_get_action(config):
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
@@ -226,7 +230,6 @@ def get_new_packageVersionId(config, newVersionId, packageId):
     return result['entityId'] if 'entityId' in result else result
 
 def update_versioned_package_version(config, newPackageVersionId):
-    time_stamp = str(time.ctime()).replace(':','')
     config.action = 'get_application_package'
     config.packageVersionId = newPackageVersionId
     bind_action_dic(config)
@@ -237,7 +240,7 @@ def update_versioned_package_version(config, newPackageVersionId):
     else:
         service_type = 'OCI'
     body = {}
-    body['version'] = sanitize_name(config.versionString) + ' ' + time_stamp
+    body['version'] = sanitize_name(config.versionString) + ' ' + get_time_stamp()
     body['description'] = config.versionString
     body['serviceType'] = service_type
     payload = {'json': (None, json.dumps(body))}
@@ -250,13 +253,12 @@ def update_versioned_package_version(config, newPackageVersionId):
         return result.text if 'text' in result else result
 
 def create_new_stack_artifact(config, fileName):
-    time_stamp = str(time.ctime()).replace(':','')
     config.action = 'get_artifacts'
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body={}
-    body['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
+    body['name'] = sanitize_name(config.versionString) + ' ' + get_time_stamp()
     body['artifactType'] = 'TERRAFORM_TEMPLATE'
     payload = {'json': (None, json.dumps(body))}
     index = fileName.rfind('/')
@@ -267,19 +269,18 @@ def create_new_stack_artifact(config, fileName):
     return result['entityId'] if 'entityId' in result else result
 
 def create_new_image_artifact(config, old_listing_artifact_version):
-    time_stamp = str(time.ctime()).replace(':', '')
     config.action = 'get_artifacts'
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     if old_listing_artifact_version is not None:
         new_version = {key:old_listing_artifact_version[key] for key in ['name', 'artifactType', 'source', 'artifactProperties']}
-        new_version['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
+        new_version['name'] = sanitize_name(config.versionString) + ' ' + get_time_stamp()
         new_version['source']['uniqueIdentifier'] = config.imageOcid
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
     else:
         new_version = {}
-        new_version['name'] = sanitize_name(config.versionString) + ' ' + time_stamp
+        new_version['name'] = sanitize_name(config.versionString) + ' ' + get_time_stamp()
         new_version['artifactType'] = 'OCI_COMPUTE_IMAGE'
         new_version['source'] = {}
         new_version['source']['regionCode'] = 'us-ashburn-1'
@@ -361,17 +362,16 @@ def create_new_listing(config):
     config.action = 'get_applications'
     file_name = find_file('metadata.yaml')
     with open(file_name, 'r') as stream:
-        new_version = yaml.safe_load(stream)
-        del new_version['listingId']
-    if 'versionDetails' in new_version:
-        vd = new_version['versionDetails']
+        new_listing_metadata = yaml.safe_load(stream)
+        del new_listing_metadata['listingId']
+    if 'versionDetails' in new_listing_metadata:
+        vd = new_listing_metadata['versionDetails']
         config.versionString = vd['versionNumber']
-        if 'releaseDate' in vd:
-            new_version['versionDetails']['releaseDate'] = str(new_version['versionDetails']['releaseDate'])
+        new_listing_metadata['versionDetails']['releaseDate'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z")
     bind_action_dic(config)
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
-    body = json.dumps(new_version)
+    body = json.dumps(new_listing_metadata)
     request = Request(uri = uri)
     result = request.post(None, body)
     return result['entityId'] if 'entityId' in result else result

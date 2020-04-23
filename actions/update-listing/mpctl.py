@@ -67,8 +67,6 @@ class ListingMetadata:
             self.api_metadata['listingId'] = args.listingId
             self.api_metadata['versionDetails']['versionNumber'] = lvd['versionDetails']['versionNumber'] \
                 if 'versionDetails' in lvd and 'versionNumber' in lvd['versionDetails'] else ''
-            self.api_metadata['versionDetails']['releaseDate'] = lvd['versionDetails']['releaseDate'] \
-                if 'versionDetails' in lvd and 'releaseDate' in lvd['versionDetails'] else ''
             self.api_metadata['name'] = lvd['name'] if 'name' in lvd else ''
             self.api_metadata['shortDescription'] = lvd['shortDescription'] if 'shortDescription' in lvd else ''
             self.api_metadata['longDescription'] = lvd['longDescription'] if 'longDescription' in lvd else ''
