@@ -275,7 +275,7 @@ def create_new_stack_artifact(config, fileName):
     apicall = action_api_uri_dic[config.action]
     uri = api_url + apicall
     body={}
-    body['name'] = config.commit_hash if config.commitHash is not None \
+    body['name'] = config.commitHash if config.commitHash is not None \
         else sanitize_name(config.versionString) + ' ' + get_time_stamp()
     body['artifactType'] = 'TERRAFORM_TEMPLATE'
     payload = {'json': (None, json.dumps(body))}
