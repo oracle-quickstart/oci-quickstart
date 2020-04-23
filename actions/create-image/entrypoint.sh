@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 apt-get update
 apt install -y jq unzip
 
