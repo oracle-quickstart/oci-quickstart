@@ -252,6 +252,22 @@ def update_versioned_package_version(config, newPackageVersionId):
     else:
         return result.text if 'text' in result else result
 
+def set_package_version_as_default(config, newVersionId, newPackageVersionId):
+    config.action = 'get_application_package'
+    config.listingVersionId = newVersionId
+    config.packageVersionId = newPackageVersionId
+    bind_action_dic(config)
+    apicall = action_api_uri_dic[config.action]
+    uri = api_url + apicall
+    body = {}
+    body['action'] = 'default'
+    request = Request(uri=uri)
+    result = request.patch(json.dumps(body), True)
+    if 'message' in result:
+        return result['message']
+    else:
+        return result.text if 'text' in result else result
+
 def create_new_stack_artifact(config, fileName):
     config.action = 'get_artifacts'
     bind_action_dic(config)
