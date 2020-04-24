@@ -257,7 +257,6 @@ def update_versioned_package_version(new_package_version_id):
         service_type = 'OCI'
     body = {}
     body['version'] = sanitize_name(config.get('versionString')) + ' ' + get_time_stamp()
-    body['description'] = config.get('versionString')
     body['serviceType'] = service_type
     payload = {'json': (None, json.dumps(body))}
 
