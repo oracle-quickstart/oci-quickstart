@@ -21,7 +21,8 @@ from mpapihelper import *
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action create_listing -imageOcid <imageOcid>
 #
 #   get one listing
-#       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId <listingVersionId>
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingVersionId
+#       <listingVersionId>
 #
 #   get the published version of one listing
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersion -listingId <listingId>
@@ -30,7 +31,8 @@ from mpapihelper import *
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action get_listingVersions
 #
 #   build one listing tree
-#       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId <listingVersionId>
+#       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingVersionId
+#       <listingVersionId>
 #
 #   build one listing tree of the published version
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action build_listings -listingId <listingId>
@@ -44,8 +46,6 @@ from mpapihelper import *
 #   dump metadata file for a listing's published version
 #       python3 mpctl.py -credsFile <path to creds yaml file> -action dump_metadata -listingId <listingId>
 #######################################################################################################################
-
-config = None
 
 
 class ListingMetadata:
@@ -62,7 +62,7 @@ class ListingMetadata:
                 self.git_metadata = yaml.safe_load(stream)
 
         if lv is not None:
-            lvd = lv.listingVersionDetails
+            lvd = lv.listing_version_details
             self.api_metadata['versionDetails'] = {}
             self.api_metadata['listingId'] = args.listingId
             self.api_metadata['versionDetails']['versionNumber'] = lvd['versionDetails']['versionNumber'] \
@@ -102,13 +102,13 @@ class Artifact:
     resource = []
 
     def __init__(self, resource):
-        global config
+        config = Config()
         self.resource = resource
         self.versions = []
-        for resourceProperty in resource['properties']:
-            config.action = 'get_artifact'
-            config.artifactId = int(resourceProperty['value'])
-            r = do_get_action(config)
+        for resource_property in resource['properties']:
+            config.set('action','get_artifact')
+            config.set('artifactId', int(resource_property['value']))
+            r = do_get_action()
             av = ArtifactVersion(r)
             self.versions.append(av)
 
@@ -144,26 +144,26 @@ class Package:
 
 
 class ListingVersion:
-    packageVersions = []
-    listingVersion = ''
-    listingVersionDetails = ''
+    package_versions = []
+    listing_version = ''
+    listing_version_details = ''
     packages = []
-    listingMetadata = {}
+    listing_metadata = {}
 
-    def __init__(self, listingVersion):
-        global config
+    def __init__(self, listing_version):
         self.packages = []
-        self.listingVersion = listingVersion
+        self.listing_version = listing_version
 
-        if 'packageVersions' in self.listingVersion:
-            self.packageVersions = self.listingVersion['packageVersions']
+        if 'packageVersions' in self.listing_version:
+            self.package_versions = self.listing_version['packageVersions']
 
-        config.action = 'get_listingVersion'
-        config.listingVersionId = self.listingVersion['listingVersionId']
-        self.listingVersionDetails = do_get_action(config)
-        self.listingMetadata = ListingMetadata(find_file('metadata.yaml'), self)
-        config.action = 'get_application_packages'
-        packages = do_get_action(config)
+        config = Config()
+        config.set('action','get_listingVersion')
+        config.set('listingVersionId', self.listing_version['listingVersionId'])
+        self.listing_version_details = do_get_action()
+        self.listing_metadata = ListingMetadata(find_file('metadata.yaml'), self)
+        config.set('action','get_application_packages')
+        packages = do_get_action()
 
         for package in packages['items']:
             if not args.includeUnpublished and package['Package']['status']['code'] == 'unpublished':
@@ -174,11 +174,11 @@ class ListingVersion:
     def __str__(self):
         ppstring = ''
         ppstring += '\n'
-        ppstring += json.dumps(self.listingVersion, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listing_version, indent=4, sort_keys=False)
         ppstring += '\n'
-        ppstring += json.dumps(self.listingVersionDetails, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.listing_version_details, indent=4, sort_keys=False)
         ppstring += '\n'
-        ppstring += json.dumps(self.packageVersions, indent=4, sort_keys=False)
+        ppstring += json.dumps(self.package_versions, indent=4, sort_keys=False)
         for package in self.packages:
             ppstring += str(package)
             pass
@@ -186,34 +186,34 @@ class ListingVersion:
 
 
 class Listing:
-    listingVersions = []
+    listing_versions = []
     listingId = 0
 
-    def __init__(self, listingVersion):
-        self.listingId = listingVersion['listingId']
-        self.listingVersions = [ListingVersion(listingVersion)]
+    def __init__(self, listing_version):
+        self.listingId = listing_version['listingId']
+        self.listing_versions = [ListingVersion(listing_version)]
 
     def __str__(self):
         ppstring = ''
-        for listingVersion in self.listingVersions:
+        for listingVersion in self.listing_versions:
             ppstring += '\n'
             ppstring += str(listingVersion)
         return ppstring
 
 
 class TermVersion():
-    termVersion = []
+    term_version = []
 
-    def __init__(self, termsId, termVersion):
-        global config
-        config.action = 'get_terms_version'
-        config.termsId = termsId
-        config.termsVersionId = termVersion['termsVersionId']
-        tv = do_get_action(config)
-        self.termVersion = tv
+    def __init__(self, terms_id, term_version):
+        config = Config()
+        config.set('action','get_terms_version')
+        config.set('termsId', terms_id)
+        config.set('termsVersionId', term_version['termsVersionId'])
+        tv = do_get_action()
+        self.term_version = tv
 
     def __str__(self):
-        return json.dumps(self.termVersion, indent=4, sort_keys=False)
+        return json.dumps(self.term_version, indent=4, sort_keys=False)
 
 
 class Terms():
@@ -241,21 +241,22 @@ class Partner:
     terms = []
 
     def __init__(self):
-        global config
-        if args.all or config.listingVersionId is None or config.listingVersionId == 0:
-            config.action = 'get_listingVersions'
-        else:
-            config.action = 'get_listingVersion'
-        listingVersions = do_get_action(config)
+        config = Config()
 
-        if 'items' in listingVersions:
-            for item in listingVersions['items']:
+        if args.all or config.get('listingVersionId') is None or config.get('listingVersionId') == '0':
+            config.set('action','get_listingVersions')
+        else:
+            config.set('action','get_listingVersion')
+        listing_versions = do_get_action()
+
+        if 'items' in listing_versions:
+            for item in listing_versions['items']:
                 if not args.includeUnpublished and item['GenericListing']['status']['code'] == 'UNPUBLISHED':
                     continue
                 found = False
                 for listing in self.listings:
                     if listing.listingId == item['GenericListing']['listingId']:
-                        listing.listingVersions.append(ListingVersion(item['GenericListing']))
+                        listing.listing_versions.append(ListingVersion(item['GenericListing']))
                         found = True
                         break
 
@@ -264,11 +265,11 @@ class Partner:
                     self.listings.append(listing)
 
         else:
-            listing = Listing(listingVersions)
+            listing = Listing(listing_versions)
             self.listings.append(listing)
 
-        config.action = 'get_terms'
-        terms = do_get_action(config)
+        config.set('action','get_terms')
+        terms = do_get_action()
         if 'items' in terms:
             for item in terms['items']:
                 t = Terms(item['terms'])
@@ -291,106 +292,106 @@ class Partner:
 
 
 def do_create():
-    global config
-    config.listingVersionId = create_new_listing(config)
+    config = Config()
+    config.set('listingVersionId', create_new_listing())
 
-    upload_icon_message = upload_icon(config)
+    upload_icon_message = upload_icon()
 
     # TODO: surround with retry loop if image is still in validation
-    if config.imageOcid is None:
+    if config.get('listing_type') == 'stack':
         # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.fileName)
+        artifact_id = create_new_stack_artifact(args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, None)
+        artifact_id = create_new_image_artifact(None)
 
-    newPackageId = create_new_package(config, artifactId)
+    newPackageId = create_new_package(artifact_id)
 
     # submit the new version of the listing for approval
-    message = submit_listing(config)
+    message = submit_listing()
 
     # TODO: possible also publish new listings
-    # message = publish_listing(config)
+    # message = publish_listing()
 
     return message
 
 
 def do_update_listing():
-    global config
     partner = Partner()
 
-    if config.imageOcid is not None:
-        old_listing_artifact_version = partner.listings[0].listingVersions[0].packages[0].artifacts[0].versions[
-            0].details
+    if config.get('listing_type') == 'image':
+        old_listing_artifact_version = \
+            partner.listings[0].listing_versions[0].packages[0].artifacts[0].versions[0].details
 
     # TODO: surround this if else with retry loop while status is 'in validation'
 
-    if config.imageOcid is None:
+    if config.get('listing_type') == 'stack':
         # create new artifact for stack listing
-        artifactId = create_new_stack_artifact(config, args.fileName)
+        artifactId = create_new_stack_artifact(args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(config, old_listing_artifact_version)
+        artifactId = create_new_image_artifact(old_listing_artifact_version)
 
     # create a new version for the application listing
-    newVersionId = get_new_versionId(config)
+    new_version_id = get_new_version_id()
 
-    updated_metadata_message = update_version_metadata(config, newVersionId)
+    updated_metadata_message = update_version_metadata(new_version_id)
 
     # get the package version id needed for package version creation
-    packageId = get_packageId(config, newVersionId)
+    package_id = get_package_id(new_version_id)
 
     # create a package version from existing package
-    newPackageVersionId = get_new_packageVersionId(config, newVersionId, packageId)
+    new_package_version_id = get_new_package_version_id(new_version_id, package_id)
 
     # update versioned package details
-    message = update_versioned_package_version(config, newPackageVersionId)
+    message = update_versioned_package_version(new_package_version_id)
 
     # update versioned package details - associate newly created artifact
-    message = associate_artifact_with_package(config, artifactId, newPackageVersionId)
+    message = associate_artifact_with_package(artifactId, new_package_version_id)
 
     # set new package version as default
-    message = set_package_version_as_default(config, newVersionId, newPackageVersionId)
+    message = set_package_version_as_default(new_version_id, new_package_version_id)
 
     # submit the new version of the listing for approval
-    message = submit_listing(config)
+    message = submit_listing()
 
     # attempt to publish the listing (succeeds if partner is whitelisted)
-    message = publish_listing(config)
+    message = publish_listing()
 
     return message
 
 
-def lookup_listingVersionId_from_listingId(listingId):
-    config.action = 'get_listingVersions'
-    listingVersions = do_get_action(config)
-    for item in listingVersions['items']:
-        if item['GenericListing']['listingId'] == listingId and item['GenericListing']['status']['code'] == 'PUBLISHED':
+def lookup_listing_version_id_from_listing_id(listing_id):
+    config = Config()
+    config.set('action','get_listingVersions')
+    listing_versions = do_get_action()
+    for item in listing_versions['items']:
+        if item['GenericListing']['listingId'] == listing_id and item['GenericListing']['status']['code'] == 'PUBLISHED':
             return item['GenericListing']['listingVersionId']
     return '0'
 
 
-def find_listing_versionid(): #TODO: this shouldn't have the side effect of setting the version string
+def find_listing_version_id(): #TODO: this shouldn't have the side effect of setting the version string
 
-    listingVersionId = None
+    listing_version_id = None
     metadata_file_name = find_file('metadata.yaml')
-
+    config = Config()
     if not os.path.isfile(metadata_file_name):
-        config.versionString = 'No Version'
+        config.set('versionString', 'No Version')
         if args.listingVersionId is None:
-            listingVersionId = 0
+            listing_version_id = 0
             if args.listingId is not None:
-                listingVersionId = lookup_listingVersionId_from_listingId(args.listingId)
+                listing_version_id = lookup_listing_version_id_from_listing_id(args.listingId)
     else:
         with open(metadata_file_name, 'r') as stream:
             metadata = yaml.safe_load(stream)
-            config.versionString = metadata['versionDetails']['versionNumber']
+            config.set('versionString', metadata['versionDetails']['versionNumber'])
             if args.listingVersionId is None:
                 if args.listingId is None:
-                    listingVersionId = lookup_listingVersionId_from_listingId(metadata['listingId'])
+                    listing_version_id = lookup_listing_version_id_from_listing_id(metadata['listingId'])
                 else:
-                    listingVersionId = lookup_listingVersionId_from_listingId(args.listingId)
-    return listingVersionId
+                    listing_version_id = lookup_listing_version_id_from_listing_id(args.listingId)
+    return listing_version_id
 
 
 if __name__ == '__main__':
@@ -472,31 +473,34 @@ dump metadata file for a listing's published version
 
     args = parser.parse_args()
 
-    config = Config(args.credsFile)
+    config = Config(creds_file = args.credsFile)
     if args.artifactId is not None:
-        config.artifactId = args.artifactId
+        config.set('artifactId', args.artifactId)
     if args.action is not None:
-        config.action = args.action
+        config.set('action', args.action)
     if args.listingVersionId is not None:
-        config.listingVersionId = args.listingVersionId
+        config.set('listingVersionId', args.listingVersionId)
     if args.packageVersionId is not None:
-        config.packageVersionId = args.packageVersionId
+        config.set('packageVersionId', args.packageVersionId)
     if args.termsId is not None:
-        config.termsId = args.termsId
+        config.set('termsId', args.termsId)
     if args.termsVersionId is not None:
-        config.termsVersionId = args.termsVersionId
+        config.set('termsVersionId', args.termsVersionId)
     if args.imageOcid is not None:
-        config.imageOcid = args.imageOcid
+        config.set('imageOcid', args.imageOcid)
+        config.set('listing_type', 'image')
+    else:
+        config.set('listing_type', 'stack')
     if args.commitHash is not None:
-        config.commitHash = args.commitHash
+        config.set('commitHash', args.commitHash)
 
     if args.listingVersionId is None:
-        config.listingVersionId = find_listing_versionid()
+        config.set('listingVersionId', find_listing_version_id())
     else:
-        config.listingVersionId = args.listingVersionId
+        config.set('listingVersionId', args.listingVersionId)
 
     if 'get' in args.action:
-        r_json = do_get_action(config)
+        r_json = do_get_action()
         print(json.dumps(r_json, indent=4, sort_keys=True))
 
     if 'create' in args.action:
@@ -511,5 +515,5 @@ dump metadata file for a listing's published version
 
     if 'dump_metadata' in args.action:
         partner = Partner()
-        lmd = ListingMetadata(None, partner.listings[0].listingVersions[0])
+        lmd = ListingMetadata(None, partner.listings[0].listing_versions[0])
         lmd.write_metadata(f'metadata.yaml')
