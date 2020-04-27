@@ -116,8 +116,9 @@ class Request:
 
         Request.instance.kwargs['api_headers'] = api_headers
 
-    def get(self):
-        r = requests.get(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'])
+    def get(self, qsp = None):
+        uri = Request.instance.kwargs['uri'] + (f'?{qsp}' if qsp is not None else '')
+        r = requests.get(uri, headers=Request.instance.kwargs['api_headers'])
         if r.status_code > 299:
             print(r.text)
         return json.loads(r.text)
@@ -186,9 +187,9 @@ def get_time_stamp():
     return strftime("%Y%m%d%H%M", gmtime())
 
 
-def do_get_action():
+def do_get_action(qsp = None):
     request = Request()
-    result = request.get()
+    result = request.get(qsp)
     return result
 
 
