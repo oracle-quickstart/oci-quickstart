@@ -2,6 +2,8 @@ import sys
 import argparse
 import json
 import os.path
+from datetime import time
+
 from mpapihelper import *
 
 #######################################################################################################################
@@ -323,14 +325,29 @@ def do_update_listing():
         old_listing_artifact_version = \
             partner.listings[0].listing_versions[0].packages[0].artifacts[0].versions[0].details
 
-    # TODO: surround this if else with retry loop while status is 'in validation'
 
     if config.get('listing_type') == 'stack':
         # create new artifact for stack listing
         artifactId = create_new_stack_artifact(args.fileName)
     else:
         # create new artifact for iamge listing
-        artifactId = create_new_image_artifact(old_listing_artifact_version)
+        done = False
+        retry_count_remaining = 6
+        while not done and retry_count_remaining > 0:
+            artifactId = create_new_image_artifact(old_listing_artifact_version)
+            time.sleep(10) # give api a moment
+            config.set('action', 'get_artifact')
+            config.set('artifactId', artifactId)
+            artifact_status = do_get_action()['status']
+            if artifact_status == 'Available':
+                done = True
+            else:
+                print(f'artifact {artifactId} in status {artifact_status}, sleeping for 10 minutes.')
+                time.sleep(600)
+                retry_count_remaining = retry_count_remaining - 1
+        if retry_count_remaining <= 0:
+            raise Exception(f'artifact {artifactId} in status {artifact_status} after one hour. Please contact MP admin')
+
 
     # create a new version for the application listing
     new_version_id = get_new_version_id()
@@ -364,7 +381,7 @@ def do_update_listing():
 def lookup_listing_version_id_from_listing_id(listing_id):
     config = Config()
     config.set('action','get_listingVersions')
-    listing_versions = do_get_action()
+    listing_versions = do_get_action('status=PUBLISHED')
     for item in listing_versions['items']:
         if item['GenericListing']['listingId'] == listing_id and item['GenericListing']['status']['code'] == 'PUBLISHED':
             return item['GenericListing']['listingVersionId']
