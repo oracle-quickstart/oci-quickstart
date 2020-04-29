@@ -9,6 +9,8 @@ mkdir -p ${GITHUB_WORKSPACE}/upload
 cd "${GITHUB_WORKSPACE}/${LISTING_DIR}/marketplace"
 ./${BUILD_SCRIPT}
 export ZIP_FILE=$(ls *.zip 2> /dev/null)
+echo $(pwd)
+echo $(ls -la)
 echo "path"
 echo "${GITHUB_WORKSPACE}/${LISTING_DIR}/marketplace/*.zip"
 echo "ls"
