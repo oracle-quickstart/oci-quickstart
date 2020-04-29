@@ -2,7 +2,7 @@ import sys
 import argparse
 import json
 import os.path
-from datetime import time
+from time import sleep
 
 from mpapihelper import *
 
@@ -299,13 +299,29 @@ def do_create():
 
     upload_icon_message = upload_icon()
 
-    # TODO: surround with retry loop if image is still in validation
+    # TODO: refactor common code for image artifact status polling
     if config.get('listing_type') == 'stack':
         # create new artifact for stack listing
         artifact_id = create_new_stack_artifact(args.fileName)
     else:
         # create new artifact for iamge listing
-        artifact_id = create_new_image_artifact(None)
+        done = False
+        retry_count_remaining = 6
+        while not done and retry_count_remaining > 0:
+            artifactId = create_new_image_artifact(None)
+            sleep(10)  # give api a moment
+            config.set('action', 'get_artifact')
+            config.set('artifactId', artifactId)
+            artifact_status = do_get_action()['status']
+            if artifact_status == 'Available':
+                done = True
+            else:
+                print(f'artifact {artifactId} in status {artifact_status}, sleeping for 10 minutes.')
+                sleep(600)
+                retry_count_remaining = retry_count_remaining - 1
+        if retry_count_remaining <= 0:
+            raise Exception(
+                f'artifact {artifactId} in status {artifact_status} after one hour. Please contact MP admin')
 
     newPackageId = create_new_package(artifact_id)
 
@@ -330,12 +346,12 @@ def do_update_listing():
         # create new artifact for stack listing
         artifactId = create_new_stack_artifact(args.fileName)
     else:
-        # create new artifact for iamge listing
+        # create new artifact for image listing
         done = False
         retry_count_remaining = 6
         while not done and retry_count_remaining > 0:
             artifactId = create_new_image_artifact(old_listing_artifact_version)
-            time.sleep(10) # give api a moment
+            sleep(10) # give api a moment
             config.set('action', 'get_artifact')
             config.set('artifactId', artifactId)
             artifact_status = do_get_action()['status']
@@ -343,7 +359,7 @@ def do_update_listing():
                 done = True
             else:
                 print(f'artifact {artifactId} in status {artifact_status}, sleeping for 10 minutes.')
-                time.sleep(600)
+                sleep(600)
                 retry_count_remaining = retry_count_remaining - 1
         if retry_count_remaining <= 0:
             raise Exception(f'artifact {artifactId} in status {artifact_status} after one hour. Please contact MP admin')
