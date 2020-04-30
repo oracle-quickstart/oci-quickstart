@@ -16,12 +16,16 @@ Running the script will create in the root compartment:
 
 - a policy called `marketplace` or `marketplace_new`
 
+- id values are printed at the end to be used in tenancy setup in the partner portal
+
 ### Options/Info:
 - If you add `export NEW='true';` before the curl it will create the policy for
 the new validation service.
 
 - If you add `export TESTING='true';` before the curl it will create resources with
 random names then delete as a test.
+
+- Run `unset <var-name>` to remove either override.
 
 - Command may be run twice with no effect. If resources exist, they are unchanged
 and a 409 error returned which can be ignored.
