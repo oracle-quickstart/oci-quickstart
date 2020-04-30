@@ -17,8 +17,8 @@ Running the script will create in the root compartment:
 - a policy called `marketplace` or `marketplace_new`
 
 ### Options/Info:
-- If you add `export NEW='true';` it will create the policy for the new validation
-service.
+- If you add `export NEW='true';` before the curl it will create the policy for
+the new validation service.
 
 - If you add `export TESTING='true';` before the curl it will create resources with
 random names then delete as a test.

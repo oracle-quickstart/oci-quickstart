@@ -30,17 +30,6 @@ fi
 comp_name="marketplace_images"
 policy_name="marketplace"
 
-# testing override
-if [ -n "$TESTING" ]
-then
-  rand=$RANDOM
-  comp_name="clitest$rand"
-  policy_name="clitest$rand"
-  echo -e "${CYAN}INFO: in test mode.${NC}"
-fi
-
-echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $policy_name${NC}"
-
 policy='[
   "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
   "ALLOW SERVICE marketplace to read tenant IN TENANCY",
@@ -65,6 +54,17 @@ fi
 
 echo $policy > tmp_mkpl_policy.json
 
+# testing override
+if [ -n "$TESTING" ]
+then
+  rand=$RANDOM
+  comp_name="clitest$rand"
+  policy_name="clitest$rand"
+  echo -e "${CYAN}INFO: in test mode.${NC}"
+fi
+
+echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $policy_name${NC}"
+
 # Create compartment under root compartment
 echo -e "${CYAN}INFO: Creating compartment...${NC}"
 comp_json="$(oci iam compartment create \
@@ -77,7 +77,7 @@ echo $comp_json | jq -M .
 if [[ $comp_return -eq 0 ]]
 then
   echo -e "${GREEN}SUCCESS: compatment $comp_name created.${NC}"
-  comp_id = ${echo $comp_json | jq -r .data.id}
+  comp_id=$(echo $comp_json | jq -r .data.id)
 else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
