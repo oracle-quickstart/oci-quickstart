@@ -105,9 +105,10 @@ rm -f tmp_mkpl_policy.json
 echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
 
 echo -e "\n\n\n"
-echo -e "${CYAN}INFO: values to setup tenancy in partner portal"
-echo -e "${CYAN}tenancy_id: $tenancy_id"
-echo -e "${CYAN}compartment_id: $comp_id"
+echo -e "${CYAN}INFO: values to setup tenancy in partner portal${NC}"
+echo -e "${CYAN}tenancy_id: $tenancy_id${NC}"
+echo -e "${CYAN}compartment_id: $comp_id${NC}"
+echo -e ""
 
 # testing override
 if [ -n "$TESTING" ]
