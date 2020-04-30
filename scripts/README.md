@@ -13,13 +13,18 @@ curl -s https://raw.githubusercontent.com/oracle-quickstart/oci-quickstart/maste
 
 Running the script will create in the root compartment:
 - a compartment called `marketplace_images`
+
 - a policy called `marketplace` or `marketplace_new`
 
-If you add `export NEW='true';` it will create the policy for the new validation
+### Options/Info:
+- If you add `export NEW='true';` it will create the policy for the new validation
 service.
 
-If you add `export TESTING='true';` before the curl it will create resources with
+- If you add `export TESTING='true';` before the curl it will create resources with
 random names then delete as a test.
 
-Note, the command may be run locally if desired, provided the `oci` CLI is installed
+- Command may be run twice with no effect. If resources exist, they are unchanged
+and a 409 error returned which can be ignored.
+
+- Note, the command may be run locally if desired, provided the `oci` CLI is installed
 and configured.
