@@ -9,4 +9,4 @@ git config --local user.name "Automated Publisher"
 git config --local user.email "actions@users.noreply.github.com"
 git add "${GITHUB_WORKSPACE}/${STACK_VARS_FILE}"
 git commit -m "automated publish from update in ${GITHUB_WORKSPACE}/${LISTING_DIR}"
-git push "https://cmp-deploy:${{ secrets.PAT }}@github.com/${GITHUB_REPOSITORY}.git" HEAD:multilisting_support
+git push "https://cmp-deploy:${PAT}@github.com/${GITHUB_REPOSITORY}.git" HEAD:${branch}
