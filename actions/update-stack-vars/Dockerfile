@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM rackspacedot/python37:latest
 
 LABEL "name"="update stack listing vars"
 LABEL "version"="1.0"
