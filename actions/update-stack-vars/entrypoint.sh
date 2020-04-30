@@ -3,7 +3,7 @@ set -e
 
 export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
 
-sed -i 's/ocid1\.image\.oc1\.\.[a-z0-9]*/'"$OCID"'/' "${GITHUB_WORKSPACE}/${STACK_VARS_FILE}"
+sed -i 's/ocid1\.image\.oc1\.[a-z]*\.[a-z0-9]*/'"$OCID"'/' "${GITHUB_WORKSPACE}/${STACK_VARS_FILE}"
 
 git config user.name "Automated Publisher"
 git config user.email "actions@users.noreply.github.com"
