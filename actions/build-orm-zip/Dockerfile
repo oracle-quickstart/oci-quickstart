@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM ubuntu:latest
 
 LABEL "name"="create stack archive"
 LABEL "version"="1.0"
