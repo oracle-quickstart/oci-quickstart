@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-#export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
-export OCID="ocid1.image.oc1..aaaaaaaatkwy3262nt2wxvmdnkecwwswvpqi6keewzjwvsjyogxuhnlzzzzz"
+export OCID=$(cat ${GITHUB_WORKSPACE}/ocid.txt 2> /dev/null)
 
 sed -i 's/ocid1\.image\.oc1\.\.[a-z0-9]*/'"$OCID"'/' "${GITHUB_WORKSPACE}/${STACK_VARS_FILE}"
 
