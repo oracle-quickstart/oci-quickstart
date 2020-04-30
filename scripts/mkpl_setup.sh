@@ -49,6 +49,20 @@ policy='[
   "ALLOW SERVICE marketplace to inspect instances IN TENANCY"
 ]'
 
+# new policy override
+if [ -n "$NEW" ]
+then
+  echo -e "${CYAN}INFO: override set, using new policy/name.${NC}"
+  policy='[
+    "ALLOW SERVICE marketplace to read tenant IN TENANCY",
+    "ALLOW SERVICE marketplace to read compartments IN TENANCY",
+    "ALLOW SERVICE marketplace to read instance-images IN TENANCY",
+    "ALLOW SERVICE marketplace to inspect instances IN TENANCY",
+    "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY"
+  ]'
+  policy_name="marketplace_new"
+fi
+
 echo $policy > tmp_mkpl_policy.json
 
 # Create compartment under root compartment
@@ -63,6 +77,7 @@ echo $comp_json | jq -M .
 if [[ $comp_return -eq 0 ]]
 then
   echo -e "${GREEN}SUCCESS: compatment $comp_name created.${NC}"
+  comp_id = ${echo $comp_json | jq -r .data.id}
 else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
@@ -88,6 +103,11 @@ echo -e "${CYAN}INFO: cleaning policy tmp file...${NC}"
 rm -f tmp_mkpl_policy.json
 
 echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
+
+echo -e "\n\n\n"
+echo -e "${CYAN}INFO: values to setup tenancy in partner portal"
+echo -e "${CYAN}tenancy_id: $tenancy_id"
+echo -e "${CYAN}compartment_id: $comp_id"
 
 # testing override
 if [ -n "$TESTING" ]
