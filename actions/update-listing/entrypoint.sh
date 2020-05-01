@@ -22,8 +22,8 @@ then
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -fileName $ZIP_PATH/$ZIP_FILE -commitHash $COMMIT_HASH"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -fileName $ZIP_PATH/$ZIP_FILE -commitHash $COMMIT_HASH
     else
-        echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -imageOcid $OCID -commitHash $COMMIT_HASH"
-        python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -imageOcid $OCID -commitHash $COMMIT_HASH
+        echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -imageOcid $OCID"
+        python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action create_listing -imageOcid $OCID
     fi
 else
     if [ -z "$OCID" ]
@@ -31,7 +31,7 @@ else
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -fileName $ZIP_PATH/$ZIP_FILE -commitHash $COMMIT_HASH"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -fileName $ZIP_PATH/$ZIP_FILE -commitHash $COMMIT_HASH
     else
-        echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID -commitHash $COMMIT_HASH"
-        python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID -commitHash $COMMIT_HASH
+        echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID"
+        python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID
     fi    
 fi
