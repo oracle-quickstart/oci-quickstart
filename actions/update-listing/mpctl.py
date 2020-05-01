@@ -3,7 +3,6 @@ import argparse
 import json
 import os.path
 from time import sleep
-
 from mpapihelper import *
 
 #######################################################################################################################
