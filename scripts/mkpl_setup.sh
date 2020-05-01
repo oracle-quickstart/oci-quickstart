@@ -30,6 +30,30 @@ fi
 comp_name="marketplace_images"
 policy_name="marketplace"
 
+policy='[
+  "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
+  "ALLOW SERVICE marketplace to read tenant IN TENANCY",
+  "ALLOW SERVICE marketplace to read compartments IN TENANCY",
+  "ALLOW SERVICE marketplace to inspect instance-images IN TENANCY",
+  "ALLOW SERVICE marketplace to inspect instances IN TENANCY"
+]'
+
+# new policy override
+if [ -n "$NEW" ]
+then
+  echo -e "${CYAN}INFO: override set, using new policy/name.${NC}"
+  policy='[
+    "ALLOW SERVICE marketplace to read tenant IN TENANCY",
+    "ALLOW SERVICE marketplace to read compartments IN TENANCY",
+    "ALLOW SERVICE marketplace to read instance-images IN TENANCY",
+    "ALLOW SERVICE marketplace to inspect instances IN TENANCY",
+    "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY"
+  ]'
+  policy_name="marketplace_new"
+fi
+
+echo $policy > tmp_mkpl_policy.json
+
 # testing override
 if [ -n "$TESTING" ]
 then
@@ -40,16 +64,6 @@ then
 fi
 
 echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $policy_name${NC}"
-
-policy='[
-  "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
-  "ALLOW SERVICE marketplace to read tenant IN TENANCY",
-  "ALLOW SERVICE marketplace to read compartments IN TENANCY",
-  "ALLOW SERVICE marketplace to inspect instance-images IN TENANCY",
-  "ALLOW SERVICE marketplace to inspect instances IN TENANCY"
-]'
-
-echo $policy > tmp_mkpl_policy.json
 
 # Create compartment under root compartment
 echo -e "${CYAN}INFO: Creating compartment...${NC}"
@@ -63,6 +77,7 @@ echo $comp_json | jq -M .
 if [[ $comp_return -eq 0 ]]
 then
   echo -e "${GREEN}SUCCESS: compatment $comp_name created.${NC}"
+  comp_id=$(echo $comp_json | jq -r .data.id)
 else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
@@ -88,6 +103,12 @@ echo -e "${CYAN}INFO: cleaning policy tmp file...${NC}"
 rm -f tmp_mkpl_policy.json
 
 echo -e "${CYAN}INFO: script is idempotent, 409 errors are ignorable.${NC}"
+
+echo -e "\n\n\n"
+echo -e "${CYAN}INFO: values to setup tenancy in partner portal${NC}"
+echo -e "${CYAN}tenancy_id: $tenancy_id${NC}"
+echo -e "${CYAN}compartment_id: $comp_id${NC}"
+echo -e ""
 
 # testing override
 if [ -n "$TESTING" ]
