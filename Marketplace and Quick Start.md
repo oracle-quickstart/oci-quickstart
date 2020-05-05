@@ -2,7 +2,7 @@
 This is a guide for ISVs to promote their OCI Quick Start to an OCI Marketplace Stack listing.  We're viewing the Quick Start as an incubator for Terraform based OCI Marketplace work.  We hope you choose to publish your Quick Start in the Marketplace as well.
 
 ## Contractual Steps
-1. [Join Oracle Partner Network (OPN)](https://www.oracle.com/partners/en/partner-with-oracle/get-started/join-opn/index.html) at a Silver level for $500.  We're working on a free tier but that is not currently available.
+1. [Join Oracle Partner Network (OPN)](https://www.oracle.com/partners/en/partner-with-oracle/get-started/join-opn/index.html) at for $500.
 2. You'll need to complete the publisher agreement [here](https://go.oracle.com/LP=83217).
 
 ## Technical - Register as a Publisher
