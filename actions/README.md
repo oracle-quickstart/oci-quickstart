@@ -8,7 +8,7 @@ The actions can be combined into a workflow that offers an automated way of upda
 
 A partner that wants to leverage the Quick Start Actions must have the following:
 
--   a Quickstart repo
+-   a Quick Start repo
 -   the Terraform code must me placed under a 'terraform' directory in the repo root
 -   The following OCI credentials must be saved as Github secrets in the repo. This requires admin privileges on the repo. The terraform code will be tested against this tenancy, so resources will be created and destroyed in this account. Also, with each run the "create-image" actions will create custom images in this tenancy, make sure to clean these up.
     -   TF_VAR_user_ocid
