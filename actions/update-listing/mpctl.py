@@ -498,6 +498,8 @@ dump metadata file for a listing's published version
                         help='get all listings even if listing id is known')
     parser.add_argument('-commitHash',
                         help='a string to append to package version')
+    parser.add_argument('-debug', action='store_true',
+                        help='print api call payloads')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -506,6 +508,8 @@ dump metadata file for a listing's published version
     args = parser.parse_args()
 
     config = Config(creds_file = args.credsFile)
+    if args.debug:
+        config.set('debug', True)
     if args.artifactId is not None:
         config.set('artifactId', args.artifactId)
     if args.action is not None:
