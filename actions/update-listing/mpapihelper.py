@@ -121,7 +121,7 @@ class Request:
         uri = Request.instance.kwargs['uri'] + (f'?{qsp}' if qsp is not None else '')
         config = Config()
         if config.get('debug'):
-            print(uri)
+            print(f'get: {uri}')
         r = requests.get(uri, headers=Request.instance.kwargs['api_headers'])
         if r.status_code > 299:
             print(r.text)
@@ -131,7 +131,7 @@ class Request:
         config = Config()
         pp = pprint.PrettyPrinter(indent=4)
         if config.get('debug'):
-            print(Request.instance.kwargs['uri'])
+            print(f'post: {Request.instance.kwargs["uri"]}')
             if data is not None:
                 print('data:')
                 pp.pprint(data)
@@ -167,7 +167,7 @@ class Request:
         config = Config()
         pp = pprint.PrettyPrinter(indent=4)
         if config.get('debug'):
-            print(Request.instance.kwargs['uri'])
+            print(f'patch: {Request.instance.kwargs["uri"]}')
             if data is not None:
                 print('data:')
                 pp.pprint(data)
@@ -187,7 +187,7 @@ class Request:
         config = Config()
         pp = pprint.PrettyPrinter(indent=4)
         if config.get('debug'):
-            print(Request.instance.kwargs['uri'])
+            print(f'put: {Request.instance.kwargs["uri"]}')
             if data is not None:
                 print('data:')
                 pp.pprint(data)
