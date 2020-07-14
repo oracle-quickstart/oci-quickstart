@@ -12,15 +12,15 @@ curl -s https://raw.githubusercontent.com/oracle-quickstart/oci-quickstart/maste
 ```
 
 Running the script will create in the root compartment:
-- a compartment called `marketplace_images`
+- a compartment called `marketplace`
 
-- a policy called `marketplace` or `marketplace_new`
+- a policy called `marketplace` or `marketplace_old`
 
 - id values are printed at the end to be used in tenancy setup in the partner portal
 
 ### Options/Info:
-- If you add `export NEW='true';` before the curl it will create the policy for
-the new validation service.
+- If you add `export OLD='true';` before the curl it will create the policy for
+the old validation service.
 
 - If you add `export TESTING='true';` before the curl it will create resources with
 random names then delete as a test.

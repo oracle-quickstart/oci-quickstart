@@ -27,29 +27,30 @@ else
 fi
 
 
-comp_name="marketplace_images"
+comp_name="marketplace"
 policy_name="marketplace"
 
+# change to new policy
 policy='[
-  "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
   "ALLOW SERVICE marketplace to read tenant IN TENANCY",
   "ALLOW SERVICE marketplace to read compartments IN TENANCY",
-  "ALLOW SERVICE marketplace to inspect instance-images IN TENANCY",
-  "ALLOW SERVICE marketplace to inspect instances IN TENANCY"
+  "ALLOW SERVICE marketplace to read instance-images IN TENANCY",
+  "ALLOW SERVICE marketplace to inspect instances IN TENANCY",
+  "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY"
 ]'
 
-# new policy override
-if [ -n "$NEW" ]
+# old policy override
+if [ -n "$OLD" ]
 then
   echo -e "${CYAN}INFO: override set, using new policy/name.${NC}"
   policy='[
+    "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY",
     "ALLOW SERVICE marketplace to read tenant IN TENANCY",
     "ALLOW SERVICE marketplace to read compartments IN TENANCY",
-    "ALLOW SERVICE marketplace to read instance-images IN TENANCY",
-    "ALLOW SERVICE marketplace to inspect instances IN TENANCY",
-    "ALLOW SERVICE marketplace to manage App-catalog-publisher-listing IN TENANCY"
+    "ALLOW SERVICE marketplace to inspect instance-images IN TENANCY",
+    "ALLOW SERVICE marketplace to inspect instances IN TENANCY"
   ]'
-  policy_name="marketplace_new"
+  policy_name="marketplace_old"
 fi
 
 echo $policy > tmp_mkpl_policy.json
