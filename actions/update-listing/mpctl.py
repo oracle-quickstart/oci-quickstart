@@ -3,7 +3,6 @@ import argparse
 import json
 import os.path
 from time import sleep
-
 from mpapihelper import *
 
 #######################################################################################################################
@@ -341,10 +340,16 @@ def do_update_listing():
         old_listing_artifact_version = \
             partner.listings[0].listing_versions[0].packages[0].artifacts[0].versions[0].details
 
+    if config.get('debug'):
+        print('getting new artifact id')
 
     if config.get('listing_type') == 'stack':
         # create new artifact for stack listing
+
         artifactId = create_new_stack_artifact(args.fileName)
+
+        if config.get('debug'):
+            print(f'got artifact id {artifactId}')
     else:
         # create new artifact for image listing
         done = False
@@ -363,33 +368,70 @@ def do_update_listing():
                 retry_count_remaining = retry_count_remaining - 1
         if retry_count_remaining <= 0:
             raise Exception(f'artifact {artifactId} in status {artifact_status} after one hour. Please contact MP admin')
-
+        if config.get('debug'):
+            print(f'got artifact id {artifactId}')
 
     # create a new version for the application listing
+    if config.get('debug'):
+        print('getting new listing version id')
     new_version_id = get_new_version_id()
+    if config.get('debug'):
+        print(f'got new version  id {new_version_id}')
 
+    if config.get('debug'):
+        print('update version metadata')
     updated_metadata_message = update_version_metadata(new_version_id)
+    if config.get('debug'):
+        print(f'update result: {updated_metadata_message}')
 
     # get the package version id needed for package version creation
+    if config.get('debug'):
+        print('getting existing package id')
     package_id = get_package_id(new_version_id)
+    if config.get('debug'):
+        print(f'got package id {package_id}')
 
     # create a package version from existing package
+    if config.get('debug'):
+        print('getting new package version id')
     new_package_version_id = get_new_package_version_id(new_version_id, package_id)
+    if config.get('debug'):
+        print(f'got new package version id {new_package_version_id}')
 
     # update versioned package details
+    if config.get('debug'):
+        print('update versioned package details')
     message = update_versioned_package_version(new_package_version_id)
+    if config.get('debug'):
+        print(f'response: {message}')
 
     # update versioned package details - associate newly created artifact
+    if config.get('debug'):
+        print('update versioned package details - associate newly created artifact')
     message = associate_artifact_with_package(artifactId, new_package_version_id)
+    if config.get('debug'):
+        print(f'response: {message}')
 
     # set new package version as default
+    if config.get('debug'):
+        print('set new package version as default')
     message = set_package_version_as_default(new_version_id, new_package_version_id)
+    if config.get('debug'):
+        print(f'response: {message}')
 
     # submit the new version of the listing for approval
+    if config.get('debug'):
+        print('submit the new version of the listing for approval')
     message = submit_listing()
+    if config.get('debug'):
+        print(f'response: {message}')
 
     # attempt to publish the listing (succeeds if partner is whitelisted)
+    if config.get('debug'):
+        print('attempt to publish the listing (succeeds if partner is whitelisted)')
     message = publish_listing()
+    if config.get('debug'):
+        print(f'response: {message}')
 
     return message
 
@@ -499,6 +541,8 @@ dump metadata file for a listing's published version
                         help='get all listings even if listing id is known')
     parser.add_argument('-commitHash',
                         help='a string to append to package version')
+    parser.add_argument('-debug', action='store_true',
+                        help='print api call payloads')
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
@@ -507,6 +551,8 @@ dump metadata file for a listing's published version
     args = parser.parse_args()
 
     config = Config(creds_file = args.credsFile)
+    if args.debug:
+        config.set('debug', True)
     if args.artifactId is not None:
         config.set('artifactId', args.artifactId)
     if args.action is not None:

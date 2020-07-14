@@ -6,6 +6,7 @@ import yaml
 import json
 import os.path
 import re
+import pprint
 
 api_url = 'https://ocm-apis-cloud.oracle.com/'
 picCompartmentOcid = 'ocid1.compartment.oc1..aaaaaaaaxrcshrhpq6exsqibhdzseghk4yjgrwxn3uaev6poaek2ooz4n7eq'
@@ -118,12 +119,25 @@ class Request:
 
     def get(self, qsp = None):
         uri = Request.instance.kwargs['uri'] + (f'?{qsp}' if qsp is not None else '')
+        config = Config()
+        if config.get('debug'):
+            print(f'get: {uri}')
         r = requests.get(uri, headers=Request.instance.kwargs['api_headers'])
         if r.status_code > 299:
             print(r.text)
         return json.loads(r.text)
 
     def post(self, files=None, data=None):
+        config = Config()
+        pp = pprint.PrettyPrinter(indent=4)
+        if config.get('debug'):
+            print(f'post: {Request.instance.kwargs["uri"]}')
+            if data is not None:
+                print('data:')
+                pp.pprint(data)
+            if files is not None:
+                print('files:')
+                pp.pprint(files)
 
         # neither files nor data
         if files is None and data is None:
@@ -150,6 +164,13 @@ class Request:
         return json.loads(r.text)
 
     def patch(self, data=None, is_json=False):
+        config = Config()
+        pp = pprint.PrettyPrinter(indent=4)
+        if config.get('debug'):
+            print(f'patch: {Request.instance.kwargs["uri"]}')
+            if data is not None:
+                print('data:')
+                pp.pprint(data)
         if data is None:
             r = requests.patch(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'])
         else:
@@ -163,6 +184,13 @@ class Request:
         return json.loads(r.text)
 
     def put(self, data):
+        config = Config()
+        pp = pprint.PrettyPrinter(indent=4)
+        if config.get('debug'):
+            print(f'put: {Request.instance.kwargs["uri"]}')
+            if data is not None:
+                print('data:')
+                pp.pprint(data)
         r = requests.put(Request.instance.kwargs['uri'], headers=Request.instance.kwargs['api_headers'], files=data)
         if r.status_code > 299:
             print(r.text)
@@ -433,4 +461,16 @@ def upload_icon():
     files = {'image': open(file_name, 'rb')}
     request = Request()
     result = request.post(files)
+    return result['entityId'] if 'entityId' in result else result
+
+def validate_package(listing_version_id, package_version_id):
+    config = Config()
+    config.set('action', 'get_application_package')
+    config.set('listingVersionId', listing_version_id)
+    config.set('packageVersionId', package_version_id)
+    body = {}
+    body['action'] = 'validate'
+    data = json.dumps(body)
+    request = Request()
+    result = request.patch(data, True)
     return result['entityId'] if 'entityId' in result else result
