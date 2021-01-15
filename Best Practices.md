@@ -26,6 +26,30 @@ Don't create individual env-vars files.  Don't provide an OCI how to in each rep
 * Since referencing a generic module (e.g. a VCN template) in multiple Quick Starts requires CI/CD of the module, at first all Quick Starts should contain all required resources.
 * We should conditionalize the use of either NVME or block storage based on shape.
 
+## Commit Messages 
+
+Make sure you follow conventional commit messages while submitting any PRs on any repository which are part of `Oracle Quick Start` workspace. You can know more about them here: [Link](https://www.conventionalcommits.org/en/v1.0.0/)
+
+**Example:**
+
+```
+feat: addition of some new features
+add: changes to add new capability or functions
+cut: removing the capability or functions
+fix: a bug fix
+bump: increasing the versions or dependency versions
+build: changes to build system or external dependencies
+make: change to the build process, or tooling, or infra
+ci: changes to CI configuration files and scripts
+doc: changes to the documentation
+test: adding missing tests or correcting existing tests
+chore: changes for housekeeping (avoiding this will force more meaningful message)
+refactor: a code change that neither fixes a bug nor adds a feature
+style: changes to the code that do not affect the meaning
+optimize/perf: a code change that improves performance
+revert: reverting an accidental commit
+```
+
 ## Documentation
 Documentation of a Quick Start should be standardized and contain the same sections:
 
