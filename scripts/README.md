@@ -1,9 +1,10 @@
+# scripts
 This directory contains utility scripts intended to be run on their own.
 
 ## `mkpl_setup.sh`
 
 Used to setup the compartment and policy in a new publisher's tenancy in cloud-shell
-in the OCI console. **Note: these commands must be run in the home region of your tenancy.** 
+in the OCI console. **Note: these commands must be run in the home region of your tenancy.**
 
 Can be run with either:
 

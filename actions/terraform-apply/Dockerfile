@@ -1,8 +1,8 @@
 FROM golang
 
-LABEL "name"="test terraform code"
+LABEL "name"="Terraform Apply"
 LABEL "version"="1.0"
 
-COPY apply_test.go /apply_test.go
-COPY entrypoint.sh /entrypoint.sh
+COPY apply_test.go /
+COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]

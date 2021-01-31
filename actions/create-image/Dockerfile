@@ -1,8 +1,8 @@
-FROM golang:1.13
+FROM golang
 
-LABEL "name"="create marketplace-ready image"
+LABEL "name"="Create Image"
 LABEL "version"="1.0"
 
-COPY marketplace_image.json /marketplace_image.json
-COPY entrypoint.sh /entrypoint.sh
+COPY marketplace_image.json /
+COPY entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
