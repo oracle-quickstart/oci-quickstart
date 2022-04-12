@@ -1,3 +1,4 @@
+# scripts
 This directory contains utility scripts intended to be run on their own.
 
 ## `mkpl_setup.sh`

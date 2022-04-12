@@ -1,5 +1,7 @@
 #!/bin/bash
-set -e
+
+pip install requests
+pip install pyyaml
 
 echo "${API_CREDS}" > ${GITHUB_WORKSPACE}/api_creds.yaml
 
@@ -33,5 +35,5 @@ else
     else
         echo "python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID"
         python /mpctl.py -credsFile ${GITHUB_WORKSPACE}/api_creds.yaml -action update_listing -imageOcid $OCID
-    fi    
+    fi
 fi
