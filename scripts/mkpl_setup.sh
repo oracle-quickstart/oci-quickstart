@@ -76,8 +76,8 @@ fi
 
 if [[ $comp_return -eq 0 ]]
 then
-  echo -e "${GREEN}SUCCESS: compartment $comp_name created.${NC}"
-  comp_id=$(echo $comp_json | jq -r .data.id)
+  echo -e "${GREEN}SUCCESS: compartment $comp_name created/exists.${NC}"
+  comp_id=$(echo $comp_json | jq -r '.data[0].id')
 else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
