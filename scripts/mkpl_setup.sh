@@ -66,7 +66,7 @@ then
   echo -e "${CYAN}INFO: Comp does not exist, creating...${NC}"
   comp_json="$(oci iam compartment create \
     --compartment-id $tenancy_id \
-    --description "To contain custom images read by the marketplace service" \
+    --description "To contain custom images + stacks read by the marketplace service" \
     --name $comp_name)"
   comp_return=$?
   comp_id=$(echo $comp_json | jq -r '.data.id')
@@ -103,7 +103,7 @@ fi
 echo -e "${CYAN}INFO: Creating policy...${NC}"
 policy_json=$(oci iam policy create \
   --compartment-id $tenancy_id \
-  --description "Allow marketplace service to read images" \
+  --description "Allow marketplace service to read images + stacks" \
   --name $policy_name \
   --statements file://./tmp_mkpl_policy.json)
 policy_return=$?
