@@ -28,8 +28,7 @@ random names then delete as a test.
 
 - Run `unset <var-name>` to remove either override.
 
-- Command may be run twice with no effect. If resources exist, they are unchanged
-and a 409 error returned which can be ignored.
+- Command may be run twice with no effect. If the policy exists it is deleted and recreated under the same name. A `409 ResourceExists` error returned which can be ignored.
 
 - Note, the command may be run locally if desired, provided the `oci` CLI is installed
 and configured.

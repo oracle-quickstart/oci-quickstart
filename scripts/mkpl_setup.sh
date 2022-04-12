@@ -58,7 +58,7 @@ echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $p
 echo -e "${CYAN}INFO: Checking for compartment...${NC}"
 comp_json=$(oci iam compartment list \
   --compartment-id $tenancy_id \
-  --name marketplace)
+  --name $comp_name)
 
 if [ -z "$comp_json" ]
 then
@@ -69,15 +69,16 @@ then
     --description "To contain custom images read by the marketplace service" \
     --name $comp_name)"
   comp_return=$?
+  comp_id=$(echo $comp_json | jq -r '.data.id')
   echo $comp_json | jq -M .
 else
   echo -e "${CYAN}INFO: Compartment exists.${NC}"
+  comp_id=$(echo $comp_json | jq -r '.data[0].id')
 fi
 
 if [[ $comp_return -eq 0 ]]
 then
   echo -e "${GREEN}SUCCESS: compartment $comp_name created/exists.${NC}"
-  comp_id=$(echo $comp_json | jq -r '.data[0].id')
 else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
@@ -86,14 +87,14 @@ fi
 echo -e "${CYAN}INFO: Checking for policy...${NC}"
 policy_json=$(oci iam policy list \
   --compartment-id $tenancy_id \
-  --name marketplace)
+  --name $policy_name)
 
 if [ -z "$policy_json" ]
 then
   echo -e "${CYAN}INFO: Policy does not exist, continuing...${NC}"
 else
-  echo -e "${CYAN}INFO: Policy exists, deleting...${NC}"
   policy_id=$(echo $policy_json | jq -r '.data[0].id')
+  echo -e "${CYAN}INFO: Policy exists, deleting $policy_id ${NC}"
   # no subshell
   oci iam policy delete --policy-id $policy_id
 fi
