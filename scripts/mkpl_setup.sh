@@ -96,7 +96,7 @@ else
   policy_id=$(echo $policy_json | jq -r '.data[0].id')
   echo -e "${CYAN}INFO: Policy exists, deleting $policy_id ${NC}"
   # no subshell
-  oci iam policy delete --policy-id $policy_id
+  oci iam policy delete --force --policy-id $policy_id
 fi
 
 # Create policy under root compartment
