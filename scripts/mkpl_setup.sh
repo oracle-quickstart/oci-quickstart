@@ -54,14 +54,25 @@ fi
 
 echo -e "${CYAN}INFO: will create compartment and policy named $comp_name and $policy_name${NC}"
 
-# Create compartment under root compartment
-echo -e "${CYAN}INFO: Creating compartment...${NC}"
-comp_json="$(oci iam compartment create \
+# Check if policy exists
+echo -e "${CYAN}INFO: Checking for compartment...${NC}"
+comp_json=$(oci iam compartment list \
   --compartment-id $tenancy_id \
-  --description "To contain custom images read by the marketplace service" \
-  --name $comp_name)"
-comp_return=$?
-echo $comp_json | jq -M .
+  --name marketplace)
+
+if [ -z "$comp_json" ]
+then
+  # Create compartment under root compartment
+  echo -e "${CYAN}INFO: Comp does not exist, creating...${NC}"
+  comp_json="$(oci iam compartment create \
+    --compartment-id $tenancy_id \
+    --description "To contain custom images read by the marketplace service" \
+    --name $comp_name)"
+  comp_return=$?
+  echo $comp_json | jq -M .
+else
+  echo -e "${CYAN}INFO: Compartment exists.${NC}"
+fi
 
 if [[ $comp_return -eq 0 ]]
 then
