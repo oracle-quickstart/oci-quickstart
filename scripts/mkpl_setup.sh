@@ -71,6 +71,23 @@ else
   echo -e "${RED}ERROR: compartment not created.${NC}"
 fi
 
+# Check if policy exists
+echo -e "${CYAN}INFO: Checking for policy...${NC}"
+policy_json=$(oci iam policy list \
+  --compartment-id $tenancy_id \
+  --name marketplace)
+
+if [ -z "$policy_json" ]
+then
+  echo -e "${CYAN}INFO: Policy does not exist, continuing...${NC}"
+else
+  echo -e "${CYAN}INFO: Policy exists, deleting...${NC}"
+  policy_id=$(echo $policy_json | jq '.data[0].id')
+  policy_json=$(oci iam policy delete --policy-id $policy_id)
+  policy_return=$?
+  echo $policy_json | jq -M .
+fi
+
 # Create policy under root compartment
 echo -e "${CYAN}INFO: Creating policy...${NC}"
 policy_json=$(oci iam policy create \
