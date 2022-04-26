@@ -6,11 +6,9 @@ This directory contains utility scripts intended to be run on their own.
 Used to setup the compartment and policy in a new publisher's tenancy in cloud-shell
 in the OCI console. **Note: these commands must be run in the home region of your tenancy.**
 
-Can be run with either:
+Can be run with:
 
 ```
-curl -sL https://git.io/JfOlY | bash
-# or
 curl -s https://raw.githubusercontent.com/oracle-quickstart/oci-quickstart/master/scripts/mkpl_setup.sh | bash
 ```
 
