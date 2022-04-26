@@ -15,7 +15,7 @@ curl -s https://raw.githubusercontent.com/oracle-quickstart/oci-quickstart/maste
 Running the script will create in the root compartment:
 - a compartment called `marketplace`
 
-- a policy called `marketplace` or `marketplace_old`
+- a policy called `marketplace`
 
 - id values are printed at the end to be used in tenancy setup in the partner portal
 
